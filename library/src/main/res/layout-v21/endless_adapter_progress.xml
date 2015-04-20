@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="20dp">
+
+    <ProgressBar
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="100dp"
+        android:layout_height="10dp"
+        android:maxHeight="10dp"
+        android:minHeight="10dp"
+        android:layout_gravity="center"
+        android:indeterminate="true"/>
+
+</FrameLayout>
