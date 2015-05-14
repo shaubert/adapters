@@ -14,9 +14,9 @@ public class PagesAdapter extends FragmentStatePagerAdapter {
     static class PageInfo {
         private Class<?> cls;
         private Bundle args;
-        private String title;
+        private CharSequence title;
 
-        PageInfo(Class<?> cls, Bundle args, String title) {
+        PageInfo(Class<?> cls, Bundle args, CharSequence title) {
             this.cls = cls;
             this.args = args;
             this.title = title;
@@ -40,12 +40,12 @@ public class PagesAdapter extends FragmentStatePagerAdapter {
         addPage(cls, args, null);
     }
 
-    public void addPage(Class<?> cls, String title) {
+    public void addPage(Class<?> cls, CharSequence title) {
         addPage(cls, null, title);
     }
 
-    public void addPage(Class<?> cls, Bundle args, String title) {
-        mPages.add(new PageInfo(cls, args, null));
+    public void addPage(Class<?> cls, Bundle args, CharSequence title) {
+        mPages.add(new PageInfo(cls, args, title));
         notifyDataSetChanged();
     }
 
