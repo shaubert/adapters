@@ -7,7 +7,7 @@ Everyday use android adapters
         maven{url "https://github.com/shaubert/maven-repo/raw/master/releases"}
     }
     dependencies {
-        compile 'com.shaubert.ui.adapters:library:1.0.1'
+        compile 'com.shaubert.ui.adapters:library:1.0.2'
     }
 
 ## List of Adapters
@@ -19,7 +19,7 @@ From CommonsWare with changes:
   *  `SackOfViewsAdapter` — to create adapter from views;      
   
 From library:  
-  *  `StableIdsFragmentStatePagerAdapter` — FragmentStatePagerAdapter with stable item ids;
+  *  `StableIdsFragmentStatePagerAdapter` — FragmentStatePagerAdapter with stable item ids and notifyDataSetChange() support;
   *  `AdaptersCarousel` —  multi-adapter, you can populate it with other adapters and dynamically change current;
   *  `AdapterWithEmptyItem` — adapter wrapper that can show empty item if count == 0.
   *  `CheckableAdapter` — check/uncheck item views (that extends `Checkable` interface) in adapter;
