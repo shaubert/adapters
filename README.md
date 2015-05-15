@@ -7,7 +7,7 @@ Everyday use android adapters
         maven{url "https://github.com/shaubert/maven-repo/raw/master/releases"}
     }
     dependencies {
-        compile 'com.shaubert.ui.adapters:library:1.0.2'
+        compile 'com.shaubert.ui.adapters:library:1.0.3'
     }
 
 ## List of Adapters
@@ -38,5 +38,7 @@ Versions for `RecycleView`:
   *  `SackOfViewsRecycledViewAdapter` — same as `SackOfViewsAdapter`;
   *  `SectionRecyclerViewAdapter` — same as `SectionListAdapter`
   
+## Other
+  *  `RapidMenuChangePageListener` — implementation of `ViewPager.OnPageChangeListener` to hide/show fragment menu on `onPageSelected` (faster than default way).
   
  

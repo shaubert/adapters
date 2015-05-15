@@ -9,8 +9,9 @@ import android.support.v4.view.PagerAdapter;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import com.shaubert.ui.adapters.common.FragmentIndexResolver;
 
-public abstract class StableIdsFragmentStatePagerAdapter extends PagerAdapter {
+public abstract class StableIdsFragmentStatePagerAdapter extends PagerAdapter implements FragmentIndexResolver {
 
     private static final String TAG = "StableIdFragmStPgrAdapt";
     private static final boolean DEBUG = false;
@@ -111,7 +112,7 @@ public abstract class StableIdsFragmentStatePagerAdapter extends PagerAdapter {
                         if (pos < itemsCount) {
                             long newId = getStableId(pos);
                             if (newId == id) {
-                                return POSITION_UNCHANGED;
+                                return pos;
                             } else {
                                 for (int k = 0; k < itemsCount; k++) {
                                     if (getStableId(k) == id) {
@@ -127,6 +128,11 @@ public abstract class StableIdsFragmentStatePagerAdapter extends PagerAdapter {
             }
         }
         return POSITION_NONE;
+    }
+
+    @Override
+    public int getFragmentIndex(Fragment fragment) {
+        return Math.max(-1, getItemPosition(fragment));
     }
 
     @SuppressLint("CommitTransaction")
