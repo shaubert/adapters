@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.view.ViewGroup;
 import com.shaubert.ui.adapters.common.FragmentIndexResolver;
 
 import java.util.ArrayList;
@@ -71,6 +72,12 @@ public class PagesAdapter extends FragmentStatePagerAdapter implements FragmentI
         Fragment fragment = Fragment.instantiate(mContext, info.cls.getName(), info.args);
         fragmentPositions.put(fragment, position);
         return fragment;
+    }
+
+    @Override
+    public void destroyItem(ViewGroup container, int position, Object object) {
+        super.destroyItem(container, position, object);
+        fragmentPositions.remove(getFragment(position));
     }
 
     public @Nullable Fragment getFragment(int position) {
