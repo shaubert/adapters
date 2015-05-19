@@ -2,6 +2,7 @@ package com.shaubert.ui.adapters;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -9,6 +10,7 @@ import com.shaubert.ui.adapters.common.FragmentIndexResolver;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.WeakHashMap;
 
 public class PagesAdapter extends FragmentStatePagerAdapter implements FragmentIndexResolver {
@@ -36,7 +38,7 @@ public class PagesAdapter extends FragmentStatePagerAdapter implements FragmentI
     }
 
     public PagesAdapter(Fragment fragment) {
-        super(fragment.getFragmentManager());
+        super(fragment.getChildFragmentManager());
         mContext = fragment.getActivity();
     }
 
@@ -69,6 +71,15 @@ public class PagesAdapter extends FragmentStatePagerAdapter implements FragmentI
         Fragment fragment = Fragment.instantiate(mContext, info.cls.getName(), info.args);
         fragmentPositions.put(fragment, position);
         return fragment;
+    }
+
+    public @Nullable Fragment getFragment(int position) {
+        for (Map.Entry<Fragment, Integer> entry : fragmentPositions.entrySet()) {
+            if (entry.getValue() == position) {
+                return entry.getKey();
+            }
+        }
+        return null;
     }
 
     @Override
