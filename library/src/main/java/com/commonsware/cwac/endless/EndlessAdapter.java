@@ -50,13 +50,13 @@ public class EndlessAdapter extends AdapterWithEmptyItem {
     }
 
     private void init() {
-        setEmptyItemEnabled(false);
-
         enabledStates.put(Direction.START, false);
         enabledStates.put(Direction.END, true);
 
         states.put(Direction.START, new State());
         states.put(Direction.END, new State());
+
+        setEmptyItemEnabled(false);
     }
 
     public void setLoadingCallback(LoadingCallback loadingCallback) {
