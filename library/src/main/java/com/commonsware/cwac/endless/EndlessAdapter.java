@@ -63,24 +63,6 @@ public class EndlessAdapter extends AdapterWithEmptyItem {
         this.loadingCallback = loadingCallback;
     }
 
-    public void restartAppending() {
-        for (Direction direction : Direction.values()) {
-            if (isEnabled(direction)) {
-                State state = getState(direction);
-                state.viewType = ViewType.NONE;
-                state.keepOnAppending = true;
-            }
-        }
-        updateEmptyItemVisibilityAndNotifyChange();
-    }
-
-    public void restartAppending(Direction direction) {
-        State state = getState(direction);
-        state.viewType = ViewType.NONE;
-        state.keepOnAppending = true;
-        updateEmptyItemVisibilityAndNotifyChange();
-    }
-
     public boolean isEnabled(Direction direction) {
         return enabledStates.get(direction);
     }
@@ -142,7 +124,7 @@ public class EndlessAdapter extends AdapterWithEmptyItem {
         }
     }
 
-    public void onError(boolean hasError) {
+    public void onError() {
         for (Direction direction : Direction.values()) {
             if (isEnabled(direction)) {
                 State state = getState(direction);
@@ -152,7 +134,7 @@ public class EndlessAdapter extends AdapterWithEmptyItem {
         updateEmptyItemVisibilityAndNotifyChange();
     }
 
-    public void onError(Direction direction, boolean hasError) {
+    public void onError(Direction direction) {
         if (isEnabled(direction)) {
             State state = getState(direction);
             state.viewType = ViewType.ERROR;
@@ -175,8 +157,38 @@ public class EndlessAdapter extends AdapterWithEmptyItem {
         if (isEnabled(direction)) {
             State state = getState(direction);
             state.keepOnAppending = false;
+            state.viewType = ViewType.NONE;
             notifyDataSetChanged();
         }
+    }
+
+    public void restartAppending() {
+        for (Direction direction : Direction.values()) {
+            if (isEnabled(direction)) {
+                State state = getState(direction);
+                state.viewType = ViewType.NONE;
+                state.keepOnAppending = true;
+            }
+        }
+        updateEmptyItemVisibilityAndNotifyChange();
+    }
+
+    public void restartAppending(Direction direction) {
+        State state = getState(direction);
+        state.viewType = ViewType.NONE;
+        state.keepOnAppending = true;
+        updateEmptyItemVisibilityAndNotifyChange();
+    }
+
+    public void retry() {
+        for (Direction direction : Direction.values()) {
+            if (isEnabled(direction)) {
+                State state = getState(direction);
+                state.viewType = ViewType.NONE;
+                state.keepOnAppending = true;
+            }
+        }
+        notifyDataSetChanged();
     }
 
     @Override
@@ -318,17 +330,6 @@ public class EndlessAdapter extends AdapterWithEmptyItem {
                 loadingCallback.onLoadMore(direction);
             }
         }
-    }
-
-    public void retry() {
-        for (Direction direction : Direction.values()) {
-            if (isEnabled(direction)) {
-                State state = getState(direction);
-                state.viewType = ViewType.NONE;
-                state.keepOnAppending = true;
-            }
-        }
-        notifyDataSetChanged();
     }
 
     protected View getPendingView(ViewGroup parent) {
