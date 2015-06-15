@@ -24,53 +24,75 @@ import android.widget.ListAdapter;
 import com.shaubert.ui.adapters.AdapterWithEmptyItem;
 import com.shaubert.ui.adapters.R;
 
-/**
- * Adapter that assists another adapter in appearing endless. For example, this could be used for an adapter being
- * filled by a set of Web service calls, where each call returns a "page" of data.
- * 
- * Subclasses need to be able to return, via getPendingView() a row that can serve as both a placeholder while more data
- * is being appended. * If your situation is such that you will not know if there is more data until you do some work
- * (e.g., make another Web service call), it is up to you to do something useful with that row returned by
- * getPendingView() to let the user know you are out of data.
- */
+import java.util.HashMap;
+import java.util.Map;
+
 public abstract class EndlessAdapter extends AdapterWithEmptyItem {
 
-    private View pendingView = null;
-    private boolean keepOnAppending = true;
-    private boolean loading;
     private int pendingResource = R.layout.endless_adapter_progress;
     private int errorResource = R.layout.endless_adapter_error_loading;
-    private boolean hasError = false;
-    private View errorView = null;
     private boolean showEmptyItem;
     private float remainingPercentOfItemsToStartLoading = 0.3f;
 
-    /**
-     * Constructor wrapping a supplied ListAdapter
-     */
+    private Map<Direction, Boolean> enabledStates = new HashMap<>();
+    private Map<Direction, State> states = new HashMap<>();
+    private LoadingCallback loadingCallback;
+
     public EndlessAdapter(ListAdapter wrapped) {
         super(wrapped);
-        setEmptyItemEnabled(false);
+        init();
     }
-
-    /**
-     * Constructor wrapping a supplied ListAdapter and providing a id for a pending view.
-     * 
-     * @param wrapped
-     * @param pendingResource
-     * @param errorResource
-     */
     public EndlessAdapter(ListAdapter wrapped, int pendingResource, int errorResource) {
         super(wrapped);
         this.pendingResource = pendingResource;
         this.errorResource = errorResource;
+        init();
+    }
+
+    private void init() {
         setEmptyItemEnabled(false);
+
+        enabledStates.put(Direction.START, false);
+        enabledStates.put(Direction.END, true);
+
+        states.put(Direction.START, new State());
+        states.put(Direction.END, new State());
+    }
+
+    public void setLoadingCallback(LoadingCallback loadingCallback) {
+        this.loadingCallback = loadingCallback;
     }
 
     public void restartAppending() {
-        keepOnAppending = true;
+        for (Direction direction : Direction.values()) {
+            if (isEnabled(direction)) {
+                getState(direction).keepOnAppending = true;
+            }
+        }
         updateEmptyItemVisibility();
         notifyDataSetChanged();
+    }
+
+    public void restartAppending(Direction direction) {
+        getState(direction).keepOnAppending = true;
+        updateEmptyItemVisibility();
+        notifyDataSetChanged();
+    }
+
+    public boolean isEnabled(Direction direction) {
+        return enabledStates.get(direction);
+    }
+
+    public void setEnabled(Direction direction, boolean enabled) {
+        if (isEnabled(direction) != enabled) {
+            getState(direction).reset();
+        }
+        enabledStates.put(direction, enabled);
+        notifyDataSetChanged();
+    }
+
+    private State getState(Direction direction) {
+        return states.get(direction);
     }
 
     @Override
@@ -85,7 +107,15 @@ public abstract class EndlessAdapter extends AdapterWithEmptyItem {
     }
 
     private void updateEmptyItemVisibility() {
-        if (loading || hasError || keepOnAppending) {
+        boolean hide = false;
+        for (Direction direction : Direction.values()) {
+            if (isEnabled(direction) && getState(direction).hasView()) {
+                hide = true;
+                break;
+            }
+        }
+
+        if (hide) {
             super.setEmptyItemEnabled(false);
         } else {
             super.setEmptyItemEnabled(showEmptyItem);
@@ -102,142 +132,247 @@ public abstract class EndlessAdapter extends AdapterWithEmptyItem {
      * display.
      */
     public void onDataReady() {
-        this.pendingView = null;
-        this.loading = false;
+        for (Direction direction : Direction.values()) {
+            if (isEnabled(direction)) {
+                State state = getState(direction);
+                state.pendingView = null;
+                state.loading = false;
+            }
+        }
         updateEmptyItemVisibility();
         notifyDataSetChanged();
     }
 
-    public void setHasError(boolean hasError) {
-        this.hasError = hasError;
-        this.errorView = null;
-        updateEmptyItemVisibility();
-        notifyDataSetChanged();
-    }
-
-    public void setAdapterIsFull() {
-        keepOnAppending = false;
-        notifyDataSetChanged();
-    }
-
-    /**
-     * How many items are in the data set represented by this Adapter.
-     */
-    @Override
-    public int getCount() {
-        if (keepOnAppending || hasError) {
-            return (super.getCount() + 1); // one more for
-            // "pending"
-        }
-
-        return (super.getCount());
-    }
-
-    /**
-     * Masks ViewType so the AdapterView replaces the "Pending" row when new data is loaded.
-     */
-    @Override
-    public int getItemViewType(int position) {
-        if (position == getWrappedAdapter().getCount()) {
-            return (IGNORE_ITEM_VIEW_TYPE);
-        }
-
-        return (super.getItemViewType(position));
-    }
-
-    @Override
-    public Object getItem(int position) {
-        if (position >= super.getCount()) {
-            return (null);
-        }
-
-        return (super.getItem(position));
-    }
-
-    @Override
-    public long getItemId(int position) {
-        if (position >= super.getCount()) {
-            return AdapterView.INVALID_ROW_ID;
-        }
-        return super.getItemId(position);
-
-    }
-
-    /**
-     * Get a View that displays the data at the specified position in the data set. In this case, if we are at the end
-     * of the list and we are still in append mode, we ask for a pending view and return it, plus kick off the
-     * background task to append more data to the wrapped adapter.
-     * 
-     * @param position
-     *            Position of the item whose data we want
-     * @param convertView
-     *            View to recycle, if not null
-     * @param parent
-     *            ViewGroup containing the returned View
-     */
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        int ourItemPosition = super.getCount();
-        if (isShowingEmptyItem()) {
-            ourItemPosition = 0;
-        }
-
-        if (keepOnAppending && !loading && !hasError) {
-            int itemFromStartLoadingNewData =
-                    Math.max(0, Math.min(ourItemPosition, (int) (super.getCount() * (1 - remainingPercentOfItemsToStartLoading))));
-            if (position >= itemFromStartLoadingNewData) {
-                loading = true;
-                updateEmptyItemVisibility();
-                onLoadMore();
-            }
-        }
-
-        if (position == ourItemPosition) {
-            if (hasError) {
-                if (errorView == null) {
-                    errorView = getErrorView(parent);
-                }
-                return errorView;
-            } else if (keepOnAppending) {
-                if (pendingView == null) {
-                    pendingView = getPendingView(parent);
-                }
-                return pendingView;
-            }
-        }
-
-        return (super.getView(position, convertView, parent));
-    }
-
-    protected abstract void onLoadMore();
-
-    public void retry() {
-        if (pendingView == null) {
-            errorView = null;
-            hasError = false;
-            keepOnAppending = true;
+    public void onDataReady(Direction direction) {
+        if (isEnabled(direction)) {
+            State state = getState(direction);
+            state.pendingView = null;
+            state.loading = false;
+            updateEmptyItemVisibility();
             notifyDataSetChanged();
         }
     }
 
-    /**
-     * Inflates pending view using the pendingResource ID passed into the constructor
-     * 
-     * @param parent
-     * @return inflated pending view
-     */
-    protected View getPendingView(ViewGroup parent) {
-        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View view = inflater.inflate(pendingResource, parent, false);
-        return view;
+
+    public void setHasError(boolean hasError) {
+        for (Direction direction : Direction.values()) {
+            if (isEnabled(direction)) {
+                State state = getState(direction);
+                state.hasError = hasError;
+                state.errorView = null;
+            }
+        }
+        updateEmptyItemVisibility();
+        notifyDataSetChanged();
     }
 
-    /**
-     * Inflates error view using the errorResource ID passed into the constructor
-     * 
-     * @param parent
-     * @return inflated error view
-     */
+    public void setHasError(Direction direction, boolean hasError) {
+        if (isEnabled(direction)) {
+            State state = getState(direction);
+            state.hasError = hasError;
+            state.errorView = null;
+            updateEmptyItemVisibility();
+            notifyDataSetChanged();
+        }
+    }
+
+    public void setAdapterIsFull() {
+        for (Direction direction : Direction.values()) {
+            if (isEnabled(direction)) {
+                State state = getState(direction);
+                state.keepOnAppending = false;
+            }
+        }
+        notifyDataSetChanged();
+    }
+
+    public void setAdapterIsFull(Direction direction) {
+        if (isEnabled(direction)) {
+            State state = getState(direction);
+            state.keepOnAppending = false;
+        }
+        notifyDataSetChanged();
+    }
+
+    @Override
+    public int getCount() {
+        int ourViews = 0;
+        for (Direction direction : Direction.values()) {
+            if (isEnabled(direction) && getState(direction).hasView()) {
+                ourViews++;
+                break;
+            }
+        }
+
+        int count = super.getCount();
+        if (count == 0) {
+            ourViews = Math.min(1, ourViews);
+        }
+        return count + ourViews;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (isEndlessAdapterItem(position)) {
+            return IGNORE_ITEM_VIEW_TYPE;
+        }
+        return super.getItemViewType(position);
+    }
+
+    public int getPosition(Direction direction, int count) {
+        switch (direction) {
+            case START:
+                return 0;
+            case END:
+            default:
+                return Math.max(0, count - 1);
+        }
+    }
+
+    private boolean shouldStartLoading(Direction direction, int position) {
+        if (isShowingEmptyItem()) {
+            return true;
+        }
+
+        int count = getCount();
+        if (count == 0) {
+            return true;
+        }
+
+        switch (direction) {
+            case START: {
+                int itemFromStartLoadingNewData = (int) (count * remainingPercentOfItemsToStartLoading);
+                return position <= itemFromStartLoadingNewData;
+            }
+            case END:
+            default: {
+                int itemFromStartLoadingNewData = (int) (count * (1 - remainingPercentOfItemsToStartLoading));
+                return position >= itemFromStartLoadingNewData;
+            }
+        }
+    }
+
+    @Override
+    public Object getItem(int position) {
+        if (isEndlessAdapterItem(position)) {
+            return null;
+        }
+        return super.getItem(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        if (isEndlessAdapterItem(position)) {
+            return AdapterView.INVALID_ROW_ID;
+        }
+        return super.getItemId(position);
+    }
+
+    public boolean isEndlessAdapterItem(int position) {
+        return getState(position) != null;
+    }
+
+    private State getState(int position) {
+        int count = getCount();
+        for (Direction direction : Direction.values()) {
+            State state = getState(direction);
+            if (isEnabled(direction)
+                    && state.hasView()
+                    && getPosition(direction, count) == position) {
+                return state;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        loadMoreItemsIfNeeded(position);
+
+        View view = getEndlessAdapterView(position, parent);
+        if (view != null) {
+            return view;
+        }
+
+        return super.getView(position, convertView, parent);
+    }
+
+    private View getEndlessAdapterView(int position, ViewGroup parent) {
+        if (super.getCount() == 0) {
+            for (Direction direction : Direction.values()) {
+                if (isEnabled(direction)) {
+                    View view = getViewFromState(getState(direction), parent);
+                    if (view != null) {
+                        return view;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        State state = getState(position);
+        if (state != null) {
+            return getViewFromState(state, parent);
+        }
+
+        return null;
+    }
+
+    private View getViewFromState(State state, ViewGroup parent) {
+        if (state.hasError) {
+            if (state.errorView == null) {
+                state.errorView = getErrorView(parent);
+            }
+            return state.errorView;
+        } else if (state.keepOnAppending) {
+            if (state.pendingView == null) {
+                state.pendingView = getPendingView(parent);
+            }
+            return state.pendingView;
+        }
+        return null;
+    }
+
+    private void loadMoreItemsIfNeeded(int position) {
+        for (Direction direction : Direction.values()) {
+            State state = getState(direction);
+            if (isEnabled(direction)
+                    && state.waitingToLoad()
+                    && shouldStartLoading(direction, position)) {
+                state.loading = true;
+                if (loadingCallback != null) {
+                    loadingCallback.onLoadMore(direction);
+                }
+                onLoadMore();
+            }
+        }
+        updateEmptyItemVisibility();
+    }
+
+    protected void onLoadMore() {
+    }
+
+    public void retry() {
+        for (Direction direction : Direction.values()) {
+            if (isEnabled(direction)) {
+                State state = getState(direction);
+                if (state.pendingView == null) {
+                    state.errorView = null;
+                    state.hasError = false;
+                    state.keepOnAppending = true;
+                    notifyDataSetChanged();
+                }
+            }
+        }
+        notifyDataSetChanged();
+    }
+
+    protected View getPendingView(ViewGroup parent) {
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+        return inflater.inflate(pendingResource, parent, false);
+    }
+
     protected View getErrorView(ViewGroup parent) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(errorResource, parent, false);
@@ -251,4 +386,36 @@ public abstract class EndlessAdapter extends AdapterWithEmptyItem {
         return view;
     }
 
+    public interface LoadingCallback {
+        void onLoadMore(Direction direction);
+    }
+
+    public enum Direction {
+        END, START
+    }
+
+    private static class State {
+        private View pendingView = null;
+        private View errorView = null;
+        private boolean keepOnAppending = true;
+        private boolean hasError;
+        private boolean loading;
+
+        public void reset() {
+            pendingView = null;
+            errorView = null;
+
+            keepOnAppending = true;
+            hasError = false;
+            loading = false;
+        }
+
+        public boolean hasView() {
+            return keepOnAppending || loading || hasError;
+        }
+
+        public boolean waitingToLoad() {
+            return keepOnAppending && !loading && !hasError;
+        }
+    }
 }
