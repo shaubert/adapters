@@ -122,15 +122,6 @@ public class EndlessAdapter extends AdapterWithEmptyItem {
         }
     }
 
-    @Override
-    public ListAdapter getWrappedAdapter() {
-        return super.getWrappedAdapter();
-    }
-
-    /**
-     * Use to manually notify the adapter that it's dataset has changed. Will remove the pendingView and update the
-     * display.
-     */
     public void onDataReady() {
         for (Direction direction : Direction.values()) {
             if (isEnabled(direction)) {
@@ -181,6 +172,8 @@ public class EndlessAdapter extends AdapterWithEmptyItem {
             if (isEnabled(direction)) {
                 State state = getState(direction);
                 state.keepOnAppending = false;
+                state.hasError = false;
+                state.loading = false;
             }
         }
         notifyDataSetChanged();
@@ -190,8 +183,8 @@ public class EndlessAdapter extends AdapterWithEmptyItem {
         if (isEnabled(direction)) {
             State state = getState(direction);
             state.keepOnAppending = false;
+            notifyDataSetChanged();
         }
-        notifyDataSetChanged();
     }
 
     @Override
@@ -217,16 +210,6 @@ public class EndlessAdapter extends AdapterWithEmptyItem {
             return IGNORE_ITEM_VIEW_TYPE;
         }
         return super.getItemViewType(position);
-    }
-
-    public int getPosition(Direction direction, int count) {
-        switch (direction) {
-            case START:
-                return 0;
-            case END:
-            default:
-                return Math.max(0, count - 1);
-        }
     }
 
     private boolean shouldStartLoading(Direction direction, int position) {
@@ -273,12 +256,11 @@ public class EndlessAdapter extends AdapterWithEmptyItem {
     }
 
     private State getState(int position) {
-        int count = getCount();
         for (Direction direction : Direction.values()) {
             State state = getState(direction);
-            if (isEnabled(direction)
+            if (state.position == position
                     && state.hasView()
-                    && getPosition(direction, count) == position) {
+                    && isEnabled(direction)) {
                 return state;
             }
         }
@@ -325,7 +307,7 @@ public class EndlessAdapter extends AdapterWithEmptyItem {
                 state.errorView = getErrorView(parent);
             }
             return state.errorView;
-        } else if (state.keepOnAppending) {
+        } else if (state.keepOnAppending || state.loading) {
             if (state.pendingView == null) {
                 state.pendingView = getPendingView(parent);
             }
@@ -386,6 +368,30 @@ public class EndlessAdapter extends AdapterWithEmptyItem {
         return view;
     }
 
+    @Override
+    public void notifyDataSetChanged() {
+        refreshStatePositions();
+        super.notifyDataSetChanged();
+    }
+
+    private void refreshStatePositions() {
+        int count = getCount();
+        for (Direction direction : Direction.values()) {
+            State state = getState(direction);
+            state.position = getPosition(direction, count);
+        }
+    }
+
+    public int getPosition(Direction direction, int count) {
+        switch (direction) {
+            case START:
+                return 0;
+            case END:
+            default:
+                return Math.max(0, count - 1);
+        }
+    }
+
     public interface LoadingCallback {
         void onLoadMore(Direction direction);
     }
@@ -400,6 +406,7 @@ public class EndlessAdapter extends AdapterWithEmptyItem {
         private boolean keepOnAppending = true;
         private boolean hasError;
         private boolean loading;
+        private int position;
 
         public void reset() {
             pendingView = null;

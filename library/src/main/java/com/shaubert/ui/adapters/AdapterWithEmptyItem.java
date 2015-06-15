@@ -73,9 +73,4 @@ public class AdapterWithEmptyItem extends AdapterWrapper {
         return isShowingEmptyItem() ? IGNORE_ITEM_VIEW_TYPE : super.getItemViewType(position);
     }
 
-    @Override
-    public ListAdapter getWrappedAdapter() {
-        return super.getWrappedAdapter();
-    }
-
 }
