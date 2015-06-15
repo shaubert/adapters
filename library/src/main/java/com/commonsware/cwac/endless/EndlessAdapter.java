@@ -213,7 +213,7 @@ public class EndlessAdapter extends AdapterWithEmptyItem {
         if (isEndlessAdapterItem(position)) {
             return IGNORE_ITEM_VIEW_TYPE;
         }
-        return super.getItemViewType(position);
+        return super.getItemViewType(getOriginalPosition(position));
     }
 
     private boolean shouldStartLoading(Direction direction, int position) {
@@ -244,7 +244,7 @@ public class EndlessAdapter extends AdapterWithEmptyItem {
         if (isEndlessAdapterItem(position)) {
             return null;
         }
-        return super.getItem(position);
+        return super.getItem(getOriginalPosition(position));
     }
 
     @Override
@@ -252,7 +252,7 @@ public class EndlessAdapter extends AdapterWithEmptyItem {
         if (isEndlessAdapterItem(position)) {
             return AdapterView.INVALID_ROW_ID;
         }
-        return super.getItemId(position);
+        return super.getItemId(getOriginalPosition(position));
     }
 
     public boolean isEndlessAdapterItem(int position) {
@@ -280,10 +280,14 @@ public class EndlessAdapter extends AdapterWithEmptyItem {
             return view;
         }
 
+        return super.getView(getOriginalPosition(position), convertView, parent);
+    }
+
+    private int getOriginalPosition(int position) {
         if (getState(0) != null) {
             position--;
         }
-        return super.getView(position, convertView, parent);
+        return position;
     }
 
     private View getEndlessAdapterView(int position, ViewGroup parent) {
