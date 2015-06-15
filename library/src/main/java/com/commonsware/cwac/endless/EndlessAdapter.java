@@ -280,6 +280,9 @@ public class EndlessAdapter extends AdapterWithEmptyItem {
             return view;
         }
 
+        if (getState(0) != null) {
+            position--;
+        }
         return super.getView(position, convertView, parent);
     }
 
