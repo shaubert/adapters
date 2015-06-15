@@ -27,7 +27,7 @@ import com.shaubert.ui.adapters.R;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class EndlessAdapter extends AdapterWithEmptyItem {
+public class EndlessAdapter extends AdapterWithEmptyItem {
 
     private int pendingResource = R.layout.endless_adapter_progress;
     private int errorResource = R.layout.endless_adapter_error_loading;
