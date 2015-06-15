@@ -66,17 +66,19 @@ public class EndlessAdapter extends AdapterWithEmptyItem {
     public void restartAppending() {
         for (Direction direction : Direction.values()) {
             if (isEnabled(direction)) {
-                getState(direction).keepOnAppending = true;
+                State state = getState(direction);
+                state.viewType = ViewType.NONE;
+                state.keepOnAppending = true;
             }
         }
-        updateEmptyItemVisibility();
-        notifyDataSetChanged();
+        updateEmptyItemVisibilityAndNotifyChange();
     }
 
     public void restartAppending(Direction direction) {
-        getState(direction).keepOnAppending = true;
-        updateEmptyItemVisibility();
-        notifyDataSetChanged();
+        State state = getState(direction);
+        state.viewType = ViewType.NONE;
+        state.keepOnAppending = true;
+        updateEmptyItemVisibilityAndNotifyChange();
     }
 
     public boolean isEnabled(Direction direction) {
@@ -88,7 +90,7 @@ public class EndlessAdapter extends AdapterWithEmptyItem {
             getState(direction).reset();
         }
         enabledStates.put(direction, enabled);
-        notifyDataSetChanged();
+        updateEmptyItemVisibilityAndNotifyChange();
     }
 
     private State getState(Direction direction) {
@@ -98,7 +100,7 @@ public class EndlessAdapter extends AdapterWithEmptyItem {
     @Override
     public void setEmptyItemEnabled(boolean showEmptyItem) {
         this.showEmptyItem = showEmptyItem;
-        updateEmptyItemVisibility();
+        updateEmptyItemVisibilityAndNotifyChange();
     }
 
     public void setRemainingPercentOfItemsToStartLoading(float percent) {
@@ -106,7 +108,7 @@ public class EndlessAdapter extends AdapterWithEmptyItem {
         notifyDataSetChanged();
     }
 
-    private void updateEmptyItemVisibility() {
+    private void updateEmptyItemVisibilityAndNotifyChange() {
         boolean hide = false;
         for (Direction direction : Direction.values()) {
             if (isEnabled(direction) && getState(direction).hasView()) {
@@ -126,44 +128,35 @@ public class EndlessAdapter extends AdapterWithEmptyItem {
         for (Direction direction : Direction.values()) {
             if (isEnabled(direction)) {
                 State state = getState(direction);
-                state.pendingView = null;
-                state.loading = false;
+                state.viewType = ViewType.NONE;
             }
         }
-        updateEmptyItemVisibility();
-        notifyDataSetChanged();
+        updateEmptyItemVisibilityAndNotifyChange();
     }
 
     public void onDataReady(Direction direction) {
         if (isEnabled(direction)) {
             State state = getState(direction);
-            state.pendingView = null;
-            state.loading = false;
-            updateEmptyItemVisibility();
-            notifyDataSetChanged();
+            state.viewType = ViewType.NONE;
+            updateEmptyItemVisibilityAndNotifyChange();
         }
     }
 
-
-    public void setHasError(boolean hasError) {
+    public void onError(boolean hasError) {
         for (Direction direction : Direction.values()) {
             if (isEnabled(direction)) {
                 State state = getState(direction);
-                state.hasError = hasError;
-                state.errorView = null;
+                state.viewType = ViewType.ERROR;
             }
         }
-        updateEmptyItemVisibility();
-        notifyDataSetChanged();
+        updateEmptyItemVisibilityAndNotifyChange();
     }
 
-    public void setHasError(Direction direction, boolean hasError) {
+    public void onError(Direction direction, boolean hasError) {
         if (isEnabled(direction)) {
             State state = getState(direction);
-            state.hasError = hasError;
-            state.errorView = null;
-            updateEmptyItemVisibility();
-            notifyDataSetChanged();
+            state.viewType = ViewType.ERROR;
+            updateEmptyItemVisibilityAndNotifyChange();
         }
     }
 
@@ -172,8 +165,7 @@ public class EndlessAdapter extends AdapterWithEmptyItem {
             if (isEnabled(direction)) {
                 State state = getState(direction);
                 state.keepOnAppending = false;
-                state.hasError = false;
-                state.loading = false;
+                state.viewType = ViewType.NONE;
             }
         }
         notifyDataSetChanged();
@@ -302,12 +294,12 @@ public class EndlessAdapter extends AdapterWithEmptyItem {
     }
 
     private View getViewFromState(State state, ViewGroup parent) {
-        if (state.hasError) {
+        if (state.viewType == ViewType.ERROR) {
             if (state.errorView == null) {
                 state.errorView = getErrorView(parent);
             }
             return state.errorView;
-        } else if (state.keepOnAppending || state.loading) {
+        } else if (state.hasView()) {
             if (state.pendingView == null) {
                 state.pendingView = getPendingView(parent);
             }
@@ -322,29 +314,18 @@ public class EndlessAdapter extends AdapterWithEmptyItem {
             if (isEnabled(direction)
                     && state.waitingToLoad()
                     && shouldStartLoading(direction, position)) {
-                state.loading = true;
-                if (loadingCallback != null) {
-                    loadingCallback.onLoadMore(direction);
-                }
-                onLoadMore();
+                state.viewType = ViewType.LOADING;
+                loadingCallback.onLoadMore(direction);
             }
         }
-        updateEmptyItemVisibility();
-    }
-
-    protected void onLoadMore() {
     }
 
     public void retry() {
         for (Direction direction : Direction.values()) {
             if (isEnabled(direction)) {
                 State state = getState(direction);
-                if (state.pendingView == null) {
-                    state.errorView = null;
-                    state.hasError = false;
-                    state.keepOnAppending = true;
-                    notifyDataSetChanged();
-                }
+                state.viewType = ViewType.NONE;
+                state.keepOnAppending = true;
             }
         }
         notifyDataSetChanged();
@@ -402,10 +383,9 @@ public class EndlessAdapter extends AdapterWithEmptyItem {
 
     private static class State {
         private View pendingView = null;
-        private View errorView = null;
+        private android.view.View errorView = null;
         private boolean keepOnAppending = true;
-        private boolean hasError;
-        private boolean loading;
+        private ViewType viewType = ViewType.NONE;
         private int position;
 
         public void reset() {
@@ -413,16 +393,19 @@ public class EndlessAdapter extends AdapterWithEmptyItem {
             errorView = null;
 
             keepOnAppending = true;
-            hasError = false;
-            loading = false;
+            viewType = ViewType.NONE;
         }
 
         public boolean hasView() {
-            return keepOnAppending || loading || hasError;
+            return keepOnAppending || viewType != ViewType.NONE;
         }
 
         public boolean waitingToLoad() {
-            return keepOnAppending && !loading && !hasError;
+            return keepOnAppending && viewType == ViewType.NONE;
         }
+    }
+
+    private enum ViewType {
+        ERROR, LOADING, NONE
     }
 }
