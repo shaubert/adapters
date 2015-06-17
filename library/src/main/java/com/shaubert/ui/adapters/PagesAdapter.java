@@ -67,11 +67,16 @@ public class PagesAdapter extends FragmentStatePagerAdapter implements FragmentI
     }
 
     @Override
-    public Fragment getItem(int position) {
-        PageInfo info = mPages.get(position);
-        Fragment fragment = Fragment.instantiate(mContext, info.cls.getName(), info.args);
+    public Object instantiateItem(ViewGroup container, int position) {
+        Fragment fragment = (Fragment) super.instantiateItem(container, position);
         fragmentPositions.put(fragment, position);
         return fragment;
+    }
+
+    @Override
+    public Fragment getItem(int position) {
+        PageInfo info = mPages.get(position);
+        return Fragment.instantiate(mContext, info.cls.getName(), info.args);
     }
 
     @Override
