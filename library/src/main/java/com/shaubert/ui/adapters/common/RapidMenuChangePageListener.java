@@ -51,7 +51,12 @@ public class RapidMenuChangePageListener implements ViewPager.OnPageChangeListen
 
     private void showMenuFor(int position) {
         List<Fragment> fragments = fragmentManager.getFragments();
+        if (fragments == null) {
+            return;
+        }
+
         for (Fragment fragment : fragments) {
+            if (fragment == null) continue;
             View view = fragment.getView();
             if (view == null) continue;
 
