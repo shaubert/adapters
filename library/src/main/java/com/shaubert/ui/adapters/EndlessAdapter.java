@@ -1,15 +1,29 @@
+/***
+  Copyright (c) 2008-2009 CommonsWare, LLC
+  Portions (c) 2009 Google, Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License"); you may
+  not use this file except in compliance with the License. You may obtain
+  a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ */
+
 package com.shaubert.ui.adapters;
 
 import android.database.DataSetObserver;
-import android.os.Handler;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import com.shaubert.ui.adapters.common.AdapterItemIds;
+import android.widget.AdapterView;
+import android.widget.ListAdapter;
 
-public abstract class RecyclerEndlessAdapter extends RecyclerAdapterWithEmptyItem {
+public class EndlessAdapter extends AdapterWithEmptyItem implements EndlessHandler.GetViewCallback {
 
     private int pendingResource = R.layout.endless_adapter_progress;
     private int errorResource = R.layout.endless_adapter_error_loading;
@@ -17,20 +31,12 @@ public abstract class RecyclerEndlessAdapter extends RecyclerAdapterWithEmptyIte
 
     private EndlessHandler endlessHandler;
 
-    private Handler handler = new Handler();
-    private Runnable setEmptyItemEnabledTask = new Runnable() {
-        @Override
-        public void run() {
-            updateEmptyItemVisibility();
-        }
-    };
-
-    public RecyclerEndlessAdapter(RecyclerView.Adapter wrapped) {
+    public EndlessAdapter(ListAdapter wrapped) {
         super(wrapped);
         init();
     }
 
-    public RecyclerEndlessAdapter(RecyclerView.Adapter wrapped, int pendingResource, int errorResource) {
+    public EndlessAdapter(ListAdapter wrapped, int pendingResource, int errorResource) {
         super(wrapped);
         this.pendingResource = pendingResource;
         this.errorResource = errorResource;
@@ -38,21 +44,12 @@ public abstract class RecyclerEndlessAdapter extends RecyclerAdapterWithEmptyIte
     }
 
     private void init() {
-        endlessHandler = new EndlessHandler(new EndlessHandler.GetViewCallback() {
-            @Override
-            public View getErrorView(ViewGroup parent) {
-                return null;
-            }
-
-            @Override
-            public View getPendingView(ViewGroup parent) {
-                return null;
-            }
-        }, new DataSetObserver() {
+        endlessHandler = new EndlessHandler(this, new DataSetObserver() {
             @Override
             public void onChanged() {
-                postUpdateEmptyItemVisibility();
-                notifyDataSetChanged();
+                if (!updateEmptyItemVisibility()) {
+                    notifyDataSetChanged();
+                }
             }
         });
 
@@ -77,9 +74,8 @@ public abstract class RecyclerEndlessAdapter extends RecyclerAdapterWithEmptyIte
         updateEmptyItemVisibility();
     }
 
-    private void postUpdateEmptyItemVisibility() {
-        handler.removeCallbacks(setEmptyItemEnabledTask);
-        handler.post(setEmptyItemEnabledTask);
+    public void setRemainingPercentOfItemsToStartLoading(float percent) {
+        this.endlessHandler.setRemainingPercentOfItemsToStartLoading(percent);
     }
 
     private boolean updateEmptyItemVisibility() {
@@ -95,10 +91,6 @@ public abstract class RecyclerEndlessAdapter extends RecyclerAdapterWithEmptyIte
             }
         }
         return false;
-    }
-
-    public void setRemainingPercentOfItemsToStartLoading(float percent) {
-        this.endlessHandler.setRemainingPercentOfItemsToStartLoading(percent);
     }
 
     public void onDataReady() {
@@ -149,46 +141,33 @@ public abstract class RecyclerEndlessAdapter extends RecyclerAdapterWithEmptyIte
         return endlessHandler.isKeepOnAppending(direction);
     }
 
-
     @Override
-    public int getItemCount() {
-        return endlessHandler.getViewsCount(super.getItemCount());
+    public int getCount() {
+        return endlessHandler.getViewsCount(super.getCount());
     }
 
     @Override
     public int getItemViewType(int position) {
         if (isEndlessAdapterItem(position)) {
-            if (endlessHandler.isError(endlessHandler.getDirection(position))) {
-                return super.getViewTypeCount() + 1;
-            } else {
-                return super.getViewTypeCount();
-            }
+            return IGNORE_ITEM_VIEW_TYPE;
         }
-
         return super.getItemViewType(endlessHandler.getOriginalPosition(position));
-    }
-
-    @Override
-    public int getViewTypeCount() {
-        return super.getViewTypeCount() + 2;
     }
 
     @Override
     public Object getItem(int position) {
         if (isEndlessAdapterItem(position)) {
-            return endlessHandler.getDirection(position);
+            return null;
         }
-
         return super.getItem(endlessHandler.getOriginalPosition(position));
     }
 
     @Override
     public long getItemId(int position) {
         if (isEndlessAdapterItem(position)) {
-            return AdapterItemIds.getIdFrom(getItem(position));
+            return AdapterView.INVALID_ROW_ID;
         }
         return super.getItemId(endlessHandler.getOriginalPosition(position));
-
     }
 
     public boolean isEndlessAdapterItem(int position) {
@@ -196,31 +175,23 @@ public abstract class RecyclerEndlessAdapter extends RecyclerAdapterWithEmptyIte
     }
 
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        int viewTypeCount = super.getViewTypeCount();
-        if (viewType == viewTypeCount) {
-            return new ViewHolder(getPendingView(parent));
-        } else if (viewType == viewTypeCount + 1) {
-            return new ViewHolder(getErrorView(parent));
+    public View getView(int position, View convertView, ViewGroup parent) {
+        View view = endlessHandler.getView(position, parent, super.getCount());
+        if (view != null) {
+            return view;
         }
 
-        return super.onCreateViewHolder(parent, viewType);
+        return super.getView(endlessHandler.getOriginalPosition(position), convertView, parent);
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        endlessHandler.getView(position, null, super.getItemCount());
-        if (!isEndlessAdapterItem(position)) {
-            super.onBindViewHolder(holder, endlessHandler.getOriginalPosition(position));
-        }
-    }
-
-    protected View getPendingView(ViewGroup parent) {
+    public View getPendingView(ViewGroup parent) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         return inflater.inflate(pendingResource, parent, false);
     }
 
-    protected View getErrorView(ViewGroup parent) {
+    @Override
+    public View getErrorView(ViewGroup parent) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(errorResource, parent, false);
         view.setClickable(true);
@@ -233,12 +204,10 @@ public abstract class RecyclerEndlessAdapter extends RecyclerAdapterWithEmptyIte
         return view;
     }
 
-    private static class ViewHolder extends RecyclerView.ViewHolder {
-        View view;
-        public ViewHolder(View itemView) {
-            super(itemView);
-            view = itemView;
-        }
+    @Override
+    public void notifyDataSetChanged() {
+        endlessHandler.onDataSetChanged(super.getCount());
+        super.notifyDataSetChanged();
     }
 
 }
