@@ -315,28 +315,28 @@ public class EndlessHandler {
         return view;
     }
 
-    public void onDataSetChanged(int count) {
-        refreshStatePositions(count);
+    public void onDataSetChanged(int superCount) {
+        refreshStatePositions(superCount);
     }
 
     private void notifyDataSetChanged() {
         observer.onChanged();
     }
 
-    private void refreshStatePositions(int count) {
+    private void refreshStatePositions(int superCount) {
         for (Direction direction : Direction.values()) {
             State state = getState(direction);
-            state.position = getPosition(direction, count);
+            state.position = getPosition(direction, superCount);
         }
     }
 
-    public int getPosition(Direction direction, int count) {
+    public int getPosition(Direction direction, int superCount) {
         switch (direction) {
             case START:
                 return 0;
             case END:
             default:
-                return Math.max(0, count - 1);
+                return superCount;
         }
     }
 

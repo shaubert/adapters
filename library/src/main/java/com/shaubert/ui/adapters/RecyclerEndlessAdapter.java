@@ -1,7 +1,6 @@
 package com.shaubert.ui.adapters;
 
 import android.database.DataSetObserver;
-import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,21 +8,12 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import com.shaubert.ui.adapters.common.AdapterItemIds;
 
-public abstract class RecyclerEndlessAdapter extends RecyclerAdapterWithEmptyItem {
+public abstract class RecyclerEndlessAdapter extends RecyclerAdapterWrapper {
 
     private int pendingResource = R.layout.endless_adapter_progress;
     private int errorResource = R.layout.endless_adapter_error_loading;
-    private boolean showEmptyItem;
 
     private EndlessHandler endlessHandler;
-
-    private Handler handler = new Handler();
-    private Runnable setEmptyItemEnabledTask = new Runnable() {
-        @Override
-        public void run() {
-            updateEmptyItemVisibility();
-        }
-    };
 
     public RecyclerEndlessAdapter(RecyclerView.Adapter wrapped) {
         super(wrapped);
@@ -51,12 +41,10 @@ public abstract class RecyclerEndlessAdapter extends RecyclerAdapterWithEmptyIte
         }, new DataSetObserver() {
             @Override
             public void onChanged() {
-                postUpdateEmptyItemVisibility();
+                refreshEndlessHandler();
                 notifyDataSetChanged();
             }
         });
-
-        setEmptyItemEnabled(false);
     }
 
     public void setLoadingCallback(LoadingCallback loadingCallback) {
@@ -69,32 +57,6 @@ public abstract class RecyclerEndlessAdapter extends RecyclerAdapterWithEmptyIte
 
     public void setEnabled(Direction direction, boolean enabled) {
         endlessHandler.setEnabled(direction, enabled);
-    }
-
-    @Override
-    public void setEmptyItemEnabled(boolean showEmptyItem) {
-        this.showEmptyItem = showEmptyItem;
-        updateEmptyItemVisibility();
-    }
-
-    private void postUpdateEmptyItemVisibility() {
-        handler.removeCallbacks(setEmptyItemEnabledTask);
-        handler.post(setEmptyItemEnabledTask);
-    }
-
-    private boolean updateEmptyItemVisibility() {
-        if (endlessHandler.hasView()) {
-            if (super.isEmptyItemEnabled()) {
-                super.setEmptyItemEnabled(false);
-                return true;
-            }
-        } else {
-            if (showEmptyItem != super.isEmptyItemEnabled()) {
-                super.setEmptyItemEnabled(showEmptyItem);
-                return true;
-            }
-        }
-        return false;
     }
 
     public void setRemainingPercentOfItemsToStartLoading(float percent) {
@@ -231,6 +193,16 @@ public abstract class RecyclerEndlessAdapter extends RecyclerAdapterWithEmptyIte
             }
         });
         return view;
+    }
+
+    @Override
+    protected void onInnerAdapterChanged() {
+        refreshEndlessHandler();
+        super.onInnerAdapterChanged();
+    }
+
+    private void refreshEndlessHandler() {
+        endlessHandler.onDataSetChanged(super.getItemCount());
     }
 
     private static class ViewHolder extends RecyclerView.ViewHolder {

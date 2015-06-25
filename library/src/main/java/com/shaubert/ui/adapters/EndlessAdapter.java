@@ -22,12 +22,12 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
+import com.commonsware.cwac.adapter.AdapterWrapper;
 
-public class EndlessAdapter extends AdapterWithEmptyItem implements EndlessHandler.GetViewCallback {
+public class EndlessAdapter extends AdapterWrapper implements EndlessHandler.GetViewCallback {
 
     private int pendingResource = R.layout.endless_adapter_progress;
     private int errorResource = R.layout.endless_adapter_error_loading;
-    private boolean showEmptyItem;
 
     private EndlessHandler endlessHandler;
 
@@ -47,13 +47,9 @@ public class EndlessAdapter extends AdapterWithEmptyItem implements EndlessHandl
         endlessHandler = new EndlessHandler(this, new DataSetObserver() {
             @Override
             public void onChanged() {
-                if (!updateEmptyItemVisibility()) {
-                    notifyDataSetChanged();
-                }
+                notifyDataSetChanged();
             }
         });
-
-        setEmptyItemEnabled(false);
     }
 
     public void setLoadingCallback(LoadingCallback loadingCallback) {
@@ -68,29 +64,8 @@ public class EndlessAdapter extends AdapterWithEmptyItem implements EndlessHandl
         endlessHandler.setEnabled(direction, enabled);
     }
 
-    @Override
-    public void setEmptyItemEnabled(boolean showEmptyItem) {
-        this.showEmptyItem = showEmptyItem;
-        updateEmptyItemVisibility();
-    }
-
     public void setRemainingPercentOfItemsToStartLoading(float percent) {
         this.endlessHandler.setRemainingPercentOfItemsToStartLoading(percent);
-    }
-
-    private boolean updateEmptyItemVisibility() {
-        if (endlessHandler.hasView()) {
-            if (super.isEmptyItemEnabled()) {
-                super.setEmptyItemEnabled(false);
-                return true;
-            }
-        } else {
-            if (showEmptyItem != super.isEmptyItemEnabled()) {
-                super.setEmptyItemEnabled(showEmptyItem);
-                return true;
-            }
-        }
-        return false;
     }
 
     public void onDataReady() {

@@ -13,31 +13,39 @@ public class RecyclerAdapterWrapper extends RecyclerView.Adapter implements Recy
         wrapped.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
             public void onChanged() {
+                onInnerAdapterChanged();
                 notifyDataSetChanged();
             }
 
             @Override
             public void onItemRangeChanged(int positionStart, int itemCount) {
+                onInnerAdapterChanged();
                 notifyItemRangeChanged(positionStart, itemCount);
             }
 
             @Override
             public void onItemRangeInserted(int positionStart, int itemCount) {
+                onInnerAdapterChanged();
                 notifyItemRangeInserted(positionStart, itemCount);
             }
 
             @Override
             public void onItemRangeRemoved(int positionStart, int itemCount) {
+                onInnerAdapterChanged();
                 notifyItemRangeRemoved(positionStart, itemCount);
             }
 
             @Override
             public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+                onInnerAdapterChanged();
                 for (int i = 0; i < itemCount; i++) {
                     notifyItemMoved(fromPosition + i, toPosition + i);
                 }
             }
         });
+    }
+
+    protected void onInnerAdapterChanged() {
     }
 
     @Override
