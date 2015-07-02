@@ -19,6 +19,14 @@ public class SimpleIndexer<T> implements ExtendedSectionIndexer {
         this(sectionRetriever, new ListAdapterWrapper<>(adapter));
     }
 
+    public SimpleIndexer(SectionRetriever<T> sectionRetriever, RecyclerSectionViewAdapter<T, ?> adapter) {
+        this(sectionRetriever, new SectionListAdapterWrapper<>(adapter));
+    }
+
+    public SimpleIndexer(SectionRetriever<T> sectionRetriever, RecyclerViewAdapter<T, ?> adapter) {
+        this(sectionRetriever, new ListAdapterWrapper<>(adapter));
+    }
+
     public SimpleIndexer(SectionRetriever<T> sectionRetriever, ItemsAdapter<T> adapter) {
         this.sectionRetriever = sectionRetriever;
         this.adapter = adapter;
