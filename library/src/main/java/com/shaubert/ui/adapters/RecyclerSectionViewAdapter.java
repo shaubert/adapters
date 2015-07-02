@@ -153,11 +153,12 @@ public abstract class RecyclerSectionViewAdapter<T, VH extends RecyclerView.View
     @Override
     @SuppressWarnings("unchecked")
     public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
+        Object item = getInternalItem(position);
         if (isSectionHeader(position)) {
-            onBindHeaderViewHolder((SectionViewHolder) viewHolder, getSectionForPosition(position), position);
+            onBindHeaderViewHolder((SectionViewHolder) viewHolder, item, position);
         } else {
             //noinspection unchecked
-            onBindNormalViewHolder((VH) viewHolder, getItem(position), position);
+            onBindNormalViewHolder((VH) viewHolder, (T) item, position);
         }
     }
 
