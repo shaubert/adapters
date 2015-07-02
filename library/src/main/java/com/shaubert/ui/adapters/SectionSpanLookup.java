@@ -4,10 +4,10 @@ import android.support.v7.widget.GridLayoutManager;
 
 public class SectionSpanLookup extends GridLayoutManager.SpanSizeLookup {
 
-    private SectionRecyclerViewAdapter adapter;
+    private RecyclerSectionViewAdapter adapter;
     private int maxSpan;
 
-    public SectionSpanLookup(SectionRecyclerViewAdapter adapter, int maxSpan) {
+    public SectionSpanLookup(RecyclerSectionViewAdapter adapter, int maxSpan) {
         this.adapter = adapter;
         this.maxSpan = maxSpan;
     }

@@ -8,7 +8,7 @@ import android.widget.SectionIndexer;
 import android.widget.TextView;
 import com.shaubert.ui.adapters.common.AdapterItemIds;
 
-public abstract class SectionRecyclerViewAdapter<T, VH extends RecyclerView.ViewHolder> extends RecyclerViewAdapter<T, RecyclerView.ViewHolder> implements SectionIndexer {
+public abstract class RecyclerSectionViewAdapter<T, VH extends RecyclerView.ViewHolder> extends RecyclerViewAdapter<T, RecyclerView.ViewHolder> implements SectionIndexer {
 
     public static class SectionViewHolder extends RecyclerView.ViewHolder {
         public final TextView sectionTitle;
@@ -35,7 +35,7 @@ public abstract class SectionRecyclerViewAdapter<T, VH extends RecyclerView.View
     private ExtendedSectionIndexer sectionIndexer;
     private boolean showSectionForEmptyList;
 
-    protected SectionRecyclerViewAdapter() {
+    protected RecyclerSectionViewAdapter() {
         setHasStableIds(true);
     }
 
@@ -154,22 +154,22 @@ public abstract class SectionRecyclerViewAdapter<T, VH extends RecyclerView.View
     @SuppressWarnings("unchecked")
     public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
         if (isSectionHeader(position)) {
-            onBindHeaderViewHolder((SectionViewHolder) viewHolder, getSectionForPosition(position));
+            onBindHeaderViewHolder((SectionViewHolder) viewHolder, getSectionForPosition(position), position);
         } else {
             //noinspection unchecked
-            onBindNormalViewHolder((VH) viewHolder, getItem(position));
+            onBindNormalViewHolder((VH) viewHolder, getItem(position), position);
         }
     }
 
     protected abstract VH onCreateNormalViewHolder(LayoutInflater inflater, ViewGroup viewGroup, int viewType);
 
-    protected abstract void onBindNormalViewHolder(VH viewHolder, T item);
+    protected abstract void onBindNormalViewHolder(VH viewHolder, T item, int position);
 
     protected SectionViewHolder onCreateHeaderViewHolder(LayoutInflater inflater, ViewGroup viewGroup) {
         return new SectionViewHolder(inflater.inflate(R.layout.list_section_header_item, viewGroup, false));
     }
 
-    protected void onBindHeaderViewHolder(SectionViewHolder viewHolder, Object section) {
+    protected void onBindHeaderViewHolder(SectionViewHolder viewHolder, Object section, int position) {
         if (section != null) {
             viewHolder.setSection(section);
         }
