@@ -8,7 +8,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import com.shaubert.ui.adapters.common.AdapterItemIds;
 
-public abstract class RecyclerEndlessAdapter extends RecyclerAdapterWrapper {
+public class RecyclerEndlessAdapter extends RecyclerAdapterWrapper {
 
     private int pendingResource = R.layout.endless_adapter_progress;
     private int errorResource = R.layout.endless_adapter_error_loading;
