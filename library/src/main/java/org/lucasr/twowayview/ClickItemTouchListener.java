@@ -109,7 +109,7 @@ public abstract class ClickItemTouchListener implements OnItemTouchListener {
             boolean handled = false;
 
             if (isTargetTheSame(event)) {
-                final int position = mHostView.getChildPosition(mTargetChild);
+                final int position = mHostView.getChildLayoutPosition(mTargetChild);
                 final long id = mHostView.getAdapter().getItemId(position);
                 handled = performItemClick(mHostView, mTargetChild, position, id);
             }
@@ -151,7 +151,7 @@ public abstract class ClickItemTouchListener implements OnItemTouchListener {
                 return;
             }
 
-            final int position = mHostView.getChildPosition(mTargetChild);
+            final int position = mHostView.getChildLayoutPosition(mTargetChild);
             final long id = mHostView.getAdapter().getItemId(position);
             final boolean handled = performItemLongClick(mHostView, mTargetChild, position, id);
 
