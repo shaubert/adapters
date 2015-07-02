@@ -5,52 +5,6 @@ import java.util.List;
 
 public class SimpleIndexer<T> implements ExtendedSectionIndexer {
 
-    public interface SectionRetriever<T> {
-        Object getSectionFrom(T item);
-    }
-    public interface ItemsAdapter<T> {
-        List<T> getItemsWithoutSections();
-
-        int getCount();
-
-        boolean isShowSectionForEmptyList();
-    }
-    public static class ListAdapterWrapper<T> implements ItemsAdapter<T> {
-        private final ListAdapter<T> adapter;
-
-        public ListAdapterWrapper(ListAdapter<T> adapter) {
-            this.adapter = adapter;
-        }
-
-        @Override
-        public List<T> getItemsWithoutSections() {
-            return adapter.getReadOnlyItems();
-        }
-
-        @Override
-        public int getCount() {
-            return adapter.getCount();
-        }
-
-        @Override
-        public boolean isShowSectionForEmptyList() {
-            return false;
-        }
-    }
-    public static class SectionListAdapterWrapper<T> extends ListAdapterWrapper<T> {
-        private final SectionListAdapter<T> adapter;
-
-        public SectionListAdapterWrapper(SectionListAdapter<T> adapter) {
-            super(adapter);
-            this.adapter = adapter;
-        }
-
-        @Override
-        public boolean isShowSectionForEmptyList() {
-            return adapter.isShowSectionForEmptyList();
-        }
-    }
-
     private Object[] sections = new Object[0];
     private Integer[] sectionPositions = new Integer[0];
 
@@ -94,8 +48,8 @@ public class SimpleIndexer<T> implements ExtendedSectionIndexer {
             this.sections = sections.toArray(new Object[sections.size()]);
             this.sectionPositions = positions.toArray(new Integer[sections.size()]);
         } else {
-            this.sections = new Object[] { sectionRetriever.getSectionFrom(null) };
-            this.sectionPositions = new Integer[] { 0 };
+            this.sections = new Object[]{sectionRetriever.getSectionFrom(null)};
+            this.sectionPositions = new Integer[]{0};
         }
     }
 
@@ -134,6 +88,68 @@ public class SimpleIndexer<T> implements ExtendedSectionIndexer {
             }
         }
         return sectionPositions.length - 1;
+    }
+
+    public interface SectionRetriever<T> {
+        Object getSectionFrom(T item);
+    }
+
+    public interface ItemsAdapter<T> {
+        List<T> getItemsWithoutSections();
+
+        int getCount();
+
+        boolean isShowSectionForEmptyList();
+    }
+
+    public static class ListAdapterWrapper<T> implements ItemsAdapter<T> {
+        protected final ListAdapter<T> listAdapter;
+        protected final RecyclerViewAdapter<T, ?> recyclerViewAdapter;
+
+        public ListAdapterWrapper(ListAdapter<T> adapter) {
+            this.listAdapter = adapter;
+            this.recyclerViewAdapter = null;
+        }
+
+        public ListAdapterWrapper(RecyclerViewAdapter<T, ?> adapter) {
+            this.listAdapter = null;
+            this.recyclerViewAdapter = adapter;
+        }
+
+        @Override
+        public List<T> getItemsWithoutSections() {
+            return recyclerViewAdapter != null ? recyclerViewAdapter.getReadOnlyItems() : listAdapter.getReadOnlyItems();
+        }
+
+        @Override
+        public int getCount() {
+            return recyclerViewAdapter != null ? recyclerViewAdapter.getItemCount() : listAdapter.getCount();
+        }
+
+        @Override
+        public boolean isShowSectionForEmptyList() {
+            return false;
+        }
+    }
+
+    public static class SectionListAdapterWrapper<T> extends ListAdapterWrapper<T> {
+
+        public SectionListAdapterWrapper(SectionListAdapter<T> adapter) {
+            super(adapter);
+        }
+
+        public SectionListAdapterWrapper(RecyclerSectionViewAdapter<T, ?> adapter) {
+            super(adapter);
+        }
+
+        @Override
+        public boolean isShowSectionForEmptyList() {
+            if (recyclerViewAdapter != null) {
+                return ((RecyclerSectionViewAdapter) recyclerViewAdapter).isShowSectionForEmptyList();
+            } else {
+                return ((SectionListAdapter) listAdapter).isShowSectionForEmptyList();
+            }
+        }
     }
 
 }
