@@ -304,14 +304,16 @@ public class EndlessHandler {
     }
 
     protected View getErrorView(ViewGroup parent) {
-        View view = getViewCallback.getPendingView(parent);
-        view.setClickable(true);
-        view.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                retry();
-            }
-        });
+        View view = getViewCallback.getErrorView(parent);
+        if (view != null) {
+            view.setClickable(true);
+            view.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    retry();
+                }
+            });
+        }
         return view;
     }
 
