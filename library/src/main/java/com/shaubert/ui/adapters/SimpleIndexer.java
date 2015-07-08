@@ -83,7 +83,10 @@ public class SimpleIndexer<T> implements ExtendedSectionIndexer {
 
     @Override
     public int getPositionForSection(int section) {
-        return sectionPositions[section];
+        if (section >= 0 && section < sectionPositions.length) {
+            return sectionPositions[section];
+        }
+        return -1;
     }
 
     @Override
