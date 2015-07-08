@@ -1,11 +1,8 @@
 package com.shaubert.ui.adapters;
 
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ListAdapter;
-import com.commonsware.cwac.adapter.AdapterWrapper;
+import android.support.v7.widget.RecyclerView;
 
-public class CheckableAdapter extends AdapterWrapper {
+public class RecyclerCheckableAdapter extends RecyclerAdapterWrapper {
 
     private CheckableAdapterState state;
 
@@ -14,11 +11,11 @@ public class CheckableAdapter extends AdapterWrapper {
      *
      * @param wrapped
      */
-    public CheckableAdapter(ListAdapter wrapped) {
+    public RecyclerCheckableAdapter(RecyclerView.Adapter wrapped) {
         this(wrapped, 0);
     }
 
-    public CheckableAdapter(ListAdapter wrapped, int checkableViewId) {
+    public RecyclerCheckableAdapter(RecyclerView.Adapter wrapped, int checkableViewId) {
         super(wrapped);
         state = new CheckableAdapterState(checkableViewId) {
             @Override
@@ -69,10 +66,9 @@ public class CheckableAdapter extends AdapterWrapper {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        View view = super.getView(position, convertView, parent);
-        state.refreshViewCheckedState(view, getItemId(position));
-        return view;
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        super.onBindViewHolder(holder, position);
+        state.refreshViewCheckedState(holder.itemView, getItemId(position));
     }
 
 }

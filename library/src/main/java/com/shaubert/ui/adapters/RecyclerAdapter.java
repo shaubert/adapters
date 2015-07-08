@@ -4,7 +4,7 @@ import android.support.v7.widget.RecyclerView;
 
 import java.util.*;
 
-public abstract class RecyclerViewAdapter<T, VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> implements RecyclerAdapterExtension {
+public abstract class RecyclerAdapter<T, VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> implements RecyclerAdapterExtension {
 
     private boolean notifyOnChange = true;
     private List<T> allItems = new ArrayList<>();

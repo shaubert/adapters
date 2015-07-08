@@ -8,7 +8,7 @@ import android.widget.SectionIndexer;
 import android.widget.TextView;
 import com.shaubert.ui.adapters.common.AdapterItemIds;
 
-public abstract class RecyclerSectionViewAdapter<T, VH extends RecyclerView.ViewHolder> extends RecyclerViewAdapter<T, RecyclerView.ViewHolder> implements SectionIndexer {
+public abstract class RecyclerSectionAdapter<T, VH extends RecyclerView.ViewHolder> extends RecyclerAdapter<T, RecyclerView.ViewHolder> implements SectionIndexer {
 
     public static class SectionViewHolder extends RecyclerView.ViewHolder {
         public final TextView sectionTitle;
@@ -35,7 +35,7 @@ public abstract class RecyclerSectionViewAdapter<T, VH extends RecyclerView.View
     private ExtendedSectionIndexer sectionIndexer;
     private boolean showSectionForEmptyList;
 
-    protected RecyclerSectionViewAdapter() {
+    protected RecyclerSectionAdapter() {
         setHasStableIds(true);
     }
 

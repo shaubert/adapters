@@ -24,10 +24,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class MergeRecycleViewAdapter extends RecyclerView.Adapter implements SectionIndexer, RecyclerAdapterExtension {
+public class RecycleMergeAdapter extends RecyclerView.Adapter implements SectionIndexer, RecyclerAdapterExtension {
     protected PieceStateRoster pieces = new PieceStateRoster();
 
-    public MergeRecycleViewAdapter() {
+    public RecycleMergeAdapter() {
         super();
     }
 
@@ -41,7 +41,7 @@ public class MergeRecycleViewAdapter extends RecyclerView.Adapter implements Sec
     }
 
     public void addViews(List<RecyclerView.ViewHolder> views) {
-        addAdapter(new SackOfViewsRecycledViewAdapter(views));
+        addAdapter(new RecyclerSackOfViewsAdapter(views));
     }
 
     @Override
@@ -287,8 +287,8 @@ public class MergeRecycleViewAdapter extends RecyclerView.Adapter implements Sec
 
         void setActive(RecyclerView.ViewHolder v, boolean isActive) {
             for (PieceState state : pieces) {
-                if (state.adapter instanceof SackOfViewsRecycledViewAdapter &&
-                        ((SackOfViewsRecycledViewAdapter) state.adapter).hasViewHolder(v)) {
+                if (state.adapter instanceof RecyclerSackOfViewsAdapter &&
+                        ((RecyclerSackOfViewsAdapter) state.adapter).hasViewHolder(v)) {
                     state.isActive = isActive;
                     active = null;
                     break;

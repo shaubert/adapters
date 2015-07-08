@@ -19,11 +19,11 @@ public class SimpleIndexer<T> implements ExtendedSectionIndexer {
         this(sectionRetriever, new ListAdapterWrapper<>(adapter));
     }
 
-    public SimpleIndexer(SectionRetriever<T> sectionRetriever, RecyclerSectionViewAdapter<T, ?> adapter) {
+    public SimpleIndexer(SectionRetriever<T> sectionRetriever, RecyclerSectionAdapter<T, ?> adapter) {
         this(sectionRetriever, new SectionListAdapterWrapper<>(adapter));
     }
 
-    public SimpleIndexer(SectionRetriever<T> sectionRetriever, RecyclerViewAdapter<T, ?> adapter) {
+    public SimpleIndexer(SectionRetriever<T> sectionRetriever, RecyclerAdapter<T, ?> adapter) {
         this(sectionRetriever, new ListAdapterWrapper<>(adapter));
     }
 
@@ -112,26 +112,26 @@ public class SimpleIndexer<T> implements ExtendedSectionIndexer {
 
     public static class ListAdapterWrapper<T> implements ItemsAdapter<T> {
         protected final ListAdapter<T> listAdapter;
-        protected final RecyclerViewAdapter<T, ?> recyclerViewAdapter;
+        protected final RecyclerAdapter<T, ?> recyclerAdapter;
 
         public ListAdapterWrapper(ListAdapter<T> adapter) {
             this.listAdapter = adapter;
-            this.recyclerViewAdapter = null;
+            this.recyclerAdapter = null;
         }
 
-        public ListAdapterWrapper(RecyclerViewAdapter<T, ?> adapter) {
+        public ListAdapterWrapper(RecyclerAdapter<T, ?> adapter) {
             this.listAdapter = null;
-            this.recyclerViewAdapter = adapter;
+            this.recyclerAdapter = adapter;
         }
 
         @Override
         public List<T> getItemsWithoutSections() {
-            return recyclerViewAdapter != null ? recyclerViewAdapter.getReadOnlyItems() : listAdapter.getReadOnlyItems();
+            return recyclerAdapter != null ? recyclerAdapter.getReadOnlyItems() : listAdapter.getReadOnlyItems();
         }
 
         @Override
         public int getCount() {
-            return recyclerViewAdapter != null ? recyclerViewAdapter.getItemCount() : listAdapter.getCount();
+            return recyclerAdapter != null ? recyclerAdapter.getItemCount() : listAdapter.getCount();
         }
 
         @Override
@@ -146,14 +146,14 @@ public class SimpleIndexer<T> implements ExtendedSectionIndexer {
             super(adapter);
         }
 
-        public SectionListAdapterWrapper(RecyclerSectionViewAdapter<T, ?> adapter) {
+        public SectionListAdapterWrapper(RecyclerSectionAdapter<T, ?> adapter) {
             super(adapter);
         }
 
         @Override
         public boolean isShowSectionForEmptyList() {
-            if (recyclerViewAdapter != null) {
-                return ((RecyclerSectionViewAdapter) recyclerViewAdapter).isShowSectionForEmptyList();
+            if (recyclerAdapter != null) {
+                return ((RecyclerSectionAdapter) recyclerAdapter).isShowSectionForEmptyList();
             } else {
                 return ((SectionListAdapter) listAdapter).isShowSectionForEmptyList();
             }

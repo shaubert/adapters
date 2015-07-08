@@ -6,17 +6,17 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SackOfViewsRecycledViewAdapter extends RecyclerView.Adapter implements RecyclerAdapterExtension {
+public class RecyclerSackOfViewsAdapter extends RecyclerView.Adapter implements RecyclerAdapterExtension {
     private List<RecyclerView.ViewHolder> viewHolders = null;
 
-    public SackOfViewsRecycledViewAdapter(int count) {
+    public RecyclerSackOfViewsAdapter(int count) {
         viewHolders = new ArrayList<>(count);
         for (int i = 0; i < count; i++) {
             viewHolders.add(null);
         }
     }
 
-    public SackOfViewsRecycledViewAdapter(List<RecyclerView.ViewHolder> viewHolders) {
+    public RecyclerSackOfViewsAdapter(List<RecyclerView.ViewHolder> viewHolders) {
         this.viewHolders = viewHolders;
     }
 
@@ -57,7 +57,7 @@ public class SackOfViewsRecycledViewAdapter extends RecyclerView.Adapter impleme
     }
 
     protected RecyclerView.ViewHolder newViewHolder(int viewType, ViewGroup parent) {
-        throw new RuntimeException("You must override newViewHolder()!");
+        throw new UnsupportedOperationException("You must override newViewHolder() or provide viewHolders in constructor!");
     }
 
     @Override
