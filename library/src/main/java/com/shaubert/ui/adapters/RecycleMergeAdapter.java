@@ -20,7 +20,6 @@ import android.view.ViewGroup;
 import android.widget.SectionIndexer;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,7 +36,7 @@ public class RecycleMergeAdapter extends RecyclerView.Adapter implements Section
     }
 
     public void addViewHolder(RecyclerView.ViewHolder view) {
-        addViews(Arrays.asList(view));
+        addViews(Collections.singletonList(view));
     }
 
     public void addViews(List<RecyclerView.ViewHolder> views) {
@@ -86,7 +85,6 @@ public class RecycleMergeAdapter extends RecyclerView.Adapter implements Section
 
     @Override
     public int getItemViewType(int position) {
-        int initialPos = position;
         int typeOffset = 0;
         int result = 0;
 
@@ -273,6 +271,7 @@ public class RecycleMergeAdapter extends RecyclerView.Adapter implements Section
 
         void add(RecyclerView.Adapter adapter) {
             pieces.add(new PieceState(adapter, true));
+            active = null;
         }
 
         void setActive(RecyclerView.Adapter adapter, boolean isActive) {

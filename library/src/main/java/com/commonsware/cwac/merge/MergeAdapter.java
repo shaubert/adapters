@@ -390,6 +390,7 @@ public class MergeAdapter extends BaseAdapter implements SectionIndexer {
 
         void add(ListAdapter adapter) {
             pieces.add(new PieceState(adapter, true));
+            active = null;
         }
 
         void setActive(ListAdapter adapter, boolean isActive) {
