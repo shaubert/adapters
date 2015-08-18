@@ -253,7 +253,6 @@ public class MergeAdapter extends BaseAdapter implements SectionIndexer {
             int size = piece.getCount();
 
             if (position < size) {
-
                 return (piece.getView(position, convertView, parent));
             }
 

@@ -60,7 +60,7 @@ public abstract class ListAdapter<T> extends BaseAdapter {
     }
 
     protected List<T> filterItems() {
-        List<T> result = new ArrayList<T>(allItems.size());
+        List<T> result = new ArrayList<>(allItems.size());
         for (T item : allItems) {
             if (isItemMatched(item)) {
                 result.add(item);
@@ -87,13 +87,7 @@ public abstract class ListAdapter<T> extends BaseAdapter {
     }
 
     public void clear() {
-        allItems.clear();
-        if (itemsFilter != null) {
-            itemsFilter.clearCache();
-        }
-        filter();
-        onDatasetChanged();
-        notifyDatasetIfNeeded();
+        replaceAll(Collections.<T>emptyList());
     }
 
     public void replaceItem(T oldItem, T newItem) {
@@ -102,14 +96,10 @@ public abstract class ListAdapter<T> extends BaseAdapter {
     }
 
     public void replaceAll(Collection<T> newItems) {
-        allItems.clear();
-        if (itemsFilter != null) {
-            itemsFilter.clearCache();
-        }
-        addItems(newItems);
+        replaceAll(newItems, true);
     }
 
-    public void replaceAll(List<T> newItems, boolean shouldResort) {
+    public void replaceAll(Collection<T> newItems, boolean shouldResort) {
         allItems.clear();
         if (itemsFilter != null) {
             itemsFilter.clearCache();

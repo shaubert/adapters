@@ -61,7 +61,7 @@ public abstract class RecyclerAdapter<T, VH extends RecyclerView.ViewHolder> ext
     }
 
     protected List<T> filterItems() {
-        List<T> result = new ArrayList<T>(allItems.size());
+        List<T> result = new ArrayList<>(allItems.size());
         for (T item : allItems) {
             if (isItemMatched(item)) {
                 result.add(item);
@@ -88,28 +88,14 @@ public abstract class RecyclerAdapter<T, VH extends RecyclerView.ViewHolder> ext
     }
 
     public void clear() {
-        globalDataSetChange = true;
-        allItems.clear();
-        if (itemsFilter != null) {
-            itemsFilter.clearCache();
-        }
-        filter();
-        onDataSetChanged();
-        notifyDataSetIfNeeded();
-        globalDataSetChange = false;
+        replaceAll(Collections.<T>emptyList());
     }
 
-    public void replaceAll(List<T> newItems) {
-        globalDataSetChange = true;
-        allItems.clear();
-        if (itemsFilter != null) {
-            itemsFilter.clearCache();
-        }
-        addItems(newItems);
-        globalDataSetChange = false;
+    public void replaceAll(Collection<T> newItems) {
+        replaceAll(newItems, true);
     }
 
-    public void replaceAll(List<T> newItems, boolean shouldResort) {
+    public void replaceAll(Collection<T> newItems, boolean shouldResort) {
         globalDataSetChange = true;
         allItems.clear();
         if (itemsFilter != null) {
@@ -123,11 +109,11 @@ public abstract class RecyclerAdapter<T, VH extends RecyclerView.ViewHolder> ext
         addItems(Collections.singletonList(item));
     }
 
-    public void addItems(List<T> items) {
+    public void addItems(Collection<T> items) {
         addItems(items, true);
     }
 
-    public void addItems(List<T> items, boolean shouldResort) {
+    public void addItems(Collection<T> items, boolean shouldResort) {
         for (T item : items) {
             allItems.add(item);
         }
