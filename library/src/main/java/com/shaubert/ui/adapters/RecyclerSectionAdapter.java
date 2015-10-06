@@ -99,15 +99,12 @@ public abstract class RecyclerSectionAdapter<T, VH extends RecyclerView.ViewHold
 
     @Override
     public final long getItemId(int position) {
+        Object item = getInternalItem(position);
         if (sectionIndexer.isSectionStart(position)) {
-            return AdapterItemIds.getIdFrom(getInternalItem(position));
+            return AdapterItemIds.getIdFrom(item);
         } else {
-            return getNormalItemId(position);
+            return getItemId((T) item);
         }
-    }
-
-    public long getNormalItemId(int position) {
-        return position;
     }
 
     @Override
