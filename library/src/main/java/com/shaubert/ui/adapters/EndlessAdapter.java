@@ -26,14 +26,13 @@ import com.commonsware.cwac.adapter.AdapterWrapper;
 
 public class EndlessAdapter extends AdapterWrapper implements EndlessHandler.GetViewCallback {
 
-    private int pendingResource = R.layout.endless_adapter_progress;
-    private int errorResource = R.layout.endless_adapter_error_loading;
+    private int pendingResource;
+    private int errorResource;
 
     private EndlessHandler endlessHandler;
 
     public EndlessAdapter(ListAdapter wrapped) {
-        super(wrapped);
-        init();
+        this(wrapped, -1, -1);
     }
 
     public EndlessAdapter(ListAdapter wrapped, int pendingResource, int errorResource) {
@@ -50,6 +49,22 @@ public class EndlessAdapter extends AdapterWrapper implements EndlessHandler.Get
                 notifyDataSetChanged();
             }
         });
+    }
+
+    public int getPendingResource() {
+        return pendingResource;
+    }
+
+    public void setPendingResource(int pendingResource) {
+        this.pendingResource = pendingResource;
+    }
+
+    public int getErrorResource() {
+        return errorResource;
+    }
+
+    public void setErrorResource(int errorResource) {
+        this.errorResource = errorResource;
     }
 
     public void setLoadingCallback(LoadingCallback loadingCallback) {
@@ -161,12 +176,20 @@ public class EndlessAdapter extends AdapterWrapper implements EndlessHandler.Get
 
     @Override
     public View getPendingView(ViewGroup parent) {
+        if (pendingResource <= 0) {
+            pendingResource = ThemeHelper.getProgressLayout(parent.getContext());
+        }
+
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         return inflater.inflate(pendingResource, parent, false);
     }
 
     @Override
     public View getErrorView(ViewGroup parent) {
+        if (errorResource <= 0) {
+            errorResource = ThemeHelper.getErrorLayout(parent.getContext());
+        }
+
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(errorResource, parent, false);
         view.setClickable(true);

@@ -11,11 +11,16 @@
         android:id="@+id/section_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        style="@style/ListSectionHeader"/>
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="4dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:textColor="?android:attr/textColorHint"
+        android:textSize="16sp"/>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="2dp"
-        android:background="@color/list_section_divider"/>
+        android:background="?android:attr/divider"/>
 
 </LinearLayout>

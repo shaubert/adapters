@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="AdaptersLibrary">
+        <attr name="adaptersLibrary_style" format="reference"/>
+    </declare-styleable>
+
+    <declare-styleable name="AdaptersLibraryStyle">
+        <attr name="adaptersLibrary_sectionLayout" format="reference"/>
+        <attr name="adaptersLibrary_emptyLayout" format="reference"/>
+        <attr name="adaptersLibrary_progressLayout" format="reference"/>
+        <attr name="adaptersLibrary_errorLayout" format="reference"/>
+    </declare-styleable>
+
+</resources>

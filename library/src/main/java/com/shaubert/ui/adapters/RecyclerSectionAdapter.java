@@ -34,6 +34,7 @@ public abstract class RecyclerSectionAdapter<T, VH extends RecyclerView.ViewHold
 
     private ExtendedSectionIndexer sectionIndexer;
     private boolean showSectionForEmptyList;
+    private int sectionLayoutResId = -1;
 
     protected RecyclerSectionAdapter() {
         setHasStableIds(true);
@@ -53,6 +54,14 @@ public abstract class RecyclerSectionAdapter<T, VH extends RecyclerView.ViewHold
             refreshSections();
             notifyDataSetChanged();
         }
+    }
+
+    public int getSectionLayoutResId() {
+        return sectionLayoutResId;
+    }
+
+    public void setSectionLayoutResId(int sectionLayoutResId) {
+        this.sectionLayoutResId = sectionLayoutResId;
     }
 
     public boolean isShowSectionForEmptyList() {
@@ -164,7 +173,10 @@ public abstract class RecyclerSectionAdapter<T, VH extends RecyclerView.ViewHold
     protected abstract void onBindNormalViewHolder(VH viewHolder, T item, int position);
 
     protected SectionViewHolder onCreateHeaderViewHolder(LayoutInflater inflater, ViewGroup viewGroup) {
-        return new SectionViewHolder(inflater.inflate(R.layout.list_section_header_item, viewGroup, false));
+        if (sectionLayoutResId <= 0) {
+            sectionLayoutResId = ThemeHelper.getSectionLayout(inflater.getContext());
+        }
+        return new SectionViewHolder(inflater.inflate(sectionLayoutResId, viewGroup, false));
     }
 
     protected void onBindHeaderViewHolder(SectionViewHolder viewHolder, Object section, int position) {

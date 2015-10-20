@@ -14,6 +14,7 @@ public abstract class SectionListAdapter<T> extends ListAdapter<T> implements Se
 
     private ExtendedSectionIndexer sectionIndexer;
     private boolean showSectionForEmptyList;
+    private int sectionLayoutResId = -1;
 
     public void setSectionIndexer(ExtendedSectionIndexer sectionIndexer) {
         this.sectionIndexer = sectionIndexer;
@@ -33,6 +34,14 @@ public abstract class SectionListAdapter<T> extends ListAdapter<T> implements Se
 
     public boolean isShowSectionForEmptyList() {
         return showSectionForEmptyList;
+    }
+
+    public int getSectionLayoutResId() {
+        return sectionLayoutResId;
+    }
+
+    public void setSectionLayoutResId(int sectionLayoutResId) {
+        this.sectionLayoutResId = sectionLayoutResId;
     }
 
     @Override
@@ -147,7 +156,10 @@ public abstract class SectionListAdapter<T> extends ListAdapter<T> implements Se
     }
 
     protected View createHeaderView(Object section, int pos, ViewGroup parent, LayoutInflater inflater) {
-        return inflater.inflate(R.layout.list_section_header_item, parent, false);
+        if (sectionLayoutResId <= 0) {
+            sectionLayoutResId = ThemeHelper.getSectionLayout(inflater.getContext());
+        }
+        return inflater.inflate(sectionLayoutResId, parent, false);
     }
 
     protected void bindHeaderView(View view, Object section, int pos) {

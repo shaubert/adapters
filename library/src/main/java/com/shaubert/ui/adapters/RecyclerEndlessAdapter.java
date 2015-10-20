@@ -10,14 +10,13 @@ import com.shaubert.ui.adapters.common.AdapterItemIds;
 
 public class RecyclerEndlessAdapter extends RecyclerAdapterWrapper {
 
-    private int pendingResource = R.layout.endless_adapter_progress;
-    private int errorResource = R.layout.endless_adapter_error_loading;
+    private int pendingResource;
+    private int errorResource;
 
     private EndlessHandler endlessHandler;
 
     public RecyclerEndlessAdapter(RecyclerView.Adapter wrapped) {
-        super(wrapped);
-        init();
+        this(wrapped, -1, -1);
     }
 
     public RecyclerEndlessAdapter(RecyclerView.Adapter wrapped, int pendingResource, int errorResource) {
@@ -45,6 +44,22 @@ public class RecyclerEndlessAdapter extends RecyclerAdapterWrapper {
                 notifyDataSetChanged();
             }
         });
+    }
+
+    public int getPendingResource() {
+        return pendingResource;
+    }
+
+    public void setPendingResource(int pendingResource) {
+        this.pendingResource = pendingResource;
+    }
+
+    public int getErrorResource() {
+        return errorResource;
+    }
+
+    public void setErrorResource(int errorResource) {
+        this.errorResource = errorResource;
     }
 
     public void setLoadingCallback(LoadingCallback loadingCallback) {
@@ -178,11 +193,19 @@ public class RecyclerEndlessAdapter extends RecyclerAdapterWrapper {
     }
 
     protected View getPendingView(ViewGroup parent) {
+        if (pendingResource <= 0) {
+            pendingResource = ThemeHelper.getProgressLayout(parent.getContext());
+        }
+
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         return inflater.inflate(pendingResource, parent, false);
     }
 
     protected View getErrorView(ViewGroup parent) {
+        if (errorResource <= 0) {
+            errorResource = ThemeHelper.getErrorLayout(parent.getContext());
+        }
+
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(errorResource, parent, false);
         view.setClickable(true);

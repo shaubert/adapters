@@ -10,9 +10,15 @@ public class RecyclerAdapterWithEmptyItem extends RecyclerAdapterWrapper {
 
     public Object EMPTY_ITEM = new Object();
     private boolean showEmptyItem = true;
+    private int emptyItemLayoutResId;
 
     public RecyclerAdapterWithEmptyItem(RecyclerView.Adapter wrapped) {
+        this(wrapped, -1);
+    }
+
+    public RecyclerAdapterWithEmptyItem(RecyclerView.Adapter wrapped, int emptyItemLayoutResId) {
         super(wrapped);
+        this.emptyItemLayoutResId = emptyItemLayoutResId;
     }
 
     public void setEmptyItemEnabled(boolean enabled) {
@@ -28,6 +34,14 @@ public class RecyclerAdapterWithEmptyItem extends RecyclerAdapterWrapper {
 
     public boolean isShowingEmptyItem() {
         return showEmptyItem && super.getItemCount() == 0;
+    }
+
+    public void setEmptyItemLayoutResId(int emptyItemLayoutResId) {
+        this.emptyItemLayoutResId = emptyItemLayoutResId;
+    }
+
+    public int getEmptyItemLayoutResId() {
+        return emptyItemLayoutResId;
     }
 
     @Override
@@ -69,7 +83,11 @@ public class RecyclerAdapterWithEmptyItem extends RecyclerAdapterWrapper {
     }
 
     protected View createEmptyView(LayoutInflater inflater, ViewGroup parent) {
-        return inflater.inflate(R.layout.empty_list_item, parent, false);
+        if (emptyItemLayoutResId <= 0) {
+            emptyItemLayoutResId = ThemeHelper.getEmptyLayout(inflater.getContext());
+        }
+
+        return inflater.inflate(emptyItemLayoutResId, parent, false);
     }
 
     @Override

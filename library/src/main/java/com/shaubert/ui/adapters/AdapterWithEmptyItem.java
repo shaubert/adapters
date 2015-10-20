@@ -11,14 +11,28 @@ public class AdapterWithEmptyItem extends AdapterWrapper {
 
     public Object EMPTY_ITEM = new Object();
     private boolean showEmptyItem = true;
+    private int emptyItemLayoutResId;
 
     public AdapterWithEmptyItem(ListAdapter wrapped) {
+        this(wrapped, -1);
+    }
+
+    public AdapterWithEmptyItem(ListAdapter wrapped, int emptyItemLayoutResId) {
         super(wrapped);
+        this.emptyItemLayoutResId = emptyItemLayoutResId;
     }
 
     public void setEmptyItemEnabled(boolean enabled) {
         this.showEmptyItem = enabled;
         notifyDataSetChanged();
+    }
+
+    public void setEmptyItemLayoutResId(int emptyItemLayoutResId) {
+        this.emptyItemLayoutResId = emptyItemLayoutResId;
+    }
+
+    public int getEmptyItemLayoutResId() {
+        return emptyItemLayoutResId;
     }
 
     public boolean isEmptyItemEnabled() {
@@ -65,7 +79,11 @@ public class AdapterWithEmptyItem extends AdapterWrapper {
     }
 
     protected View createEmptyView(LayoutInflater inflater, ViewGroup parent) {
-        return inflater.inflate(R.layout.empty_list_item, parent, false);
+        if (emptyItemLayoutResId <= 0) {
+            emptyItemLayoutResId = ThemeHelper.getEmptyLayout(inflater.getContext());
+        }
+
+        return inflater.inflate(emptyItemLayoutResId, parent, false);
     }
 
     @Override

@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 
-    <style name="ListSectionHeader" parent="android:TextAppearance">
-        <item name="android:textColor">@color/list_section_header_text</item>
-        <item name="android:textSize">16sp</item>
-        <item name="android:layout_marginTop">6dp</item>
-        <item name="android:layout_marginBottom">4dp</item>
-        <item name="android:layout_marginLeft">8dp</item>
-        <item name="android:layout_marginStart" tools:ignore="NewApi">8dp</item>
+    <style name="DefaultAdaptersLibraryStyle">
+        <item name="adaptersLibrary_sectionLayout">@layout/adapters_library_list_section_header_item</item>
+        <item name="adaptersLibrary_emptyLayout">@layout/adapters_library_empty_list_item</item>
+        <item name="adaptersLibrary_progressLayout">@layout/adapters_library_endless_adapter_progress</item>
+        <item name="adaptersLibrary_errorLayout">@layout/adapters_library_endless_adapter_error_loading</item>
     </style>
-
+    
 </resources>
