@@ -68,7 +68,7 @@ public class SimpleIndexer<T> implements ExtendedSectionIndexer {
 
     @Override
     public boolean isSectionStart(int position) {
-        return position == 0 || getSectionStart(position) == position;
+        return getSectionStart(position) == position;
     }
 
     @Override
