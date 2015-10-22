@@ -107,7 +107,7 @@ public class RecyclerAdapterWrapper extends RecyclerView.Adapter implements Recy
         wrapped.onDetachedFromRecyclerView(recyclerView);
     }
 
-    protected RecyclerView.Adapter getWrappedAdapter() {
+    public RecyclerView.Adapter getWrappedAdapter() {
         return wrapped;
     }
 
