@@ -1,37 +1,52 @@
-/***
-  Copyright (c) 2008-2009 CommonsWare, LLC
-  Portions (c) 2009 Google, Inc.
-
-  Licensed under the Apache License, Version 2.0 (the "License"); you may
-  not use this file except in compliance with the License. You may obtain
-  a copy of the License at
-    http://www.apache.org/licenses/LICENSE-2.0
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
- */
-
 package com.shaubert.ui.adapters;
 
 import android.database.DataSetObserver;
+import android.os.Handler;
+import android.os.Message;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
 public class EndlessHandler {
 
+    public static final int NO_POSITION = -1;
+
     private float remainingPercentOfItemsToStartLoading = 0.3f;
 
     private Map<Direction, Boolean> enabledStates = new HashMap<>();
     private Map<Direction, State> states = new HashMap<>();
+    private DirectionPosition directionPositions[];
     private LoadingCallback loadingCallback;
     private GetViewCallback getViewCallback;
     private DataSetObserver observer;
+
+    public static final int LOAD_END = 1;
+    public static final int LOAD_START = 2;
+    public static final int NOTIFY_CHANGE = 10;
+
+    private Handler handler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
+            switch (msg.what) {
+                case LOAD_END:
+                    loadMoreItems(Direction.END);
+                    return true;
+                case LOAD_START:
+                    loadMoreItems(Direction.START);
+                    return true;
+
+                case NOTIFY_CHANGE:
+                    notifyDataSetChanged();
+                    return true;
+            }
+            return false;
+        }
+    });
 
     public EndlessHandler(GetViewCallback getViewCallback, DataSetObserver observer) {
         this.getViewCallback = getViewCallback;
@@ -42,6 +57,11 @@ public class EndlessHandler {
 
         states.put(Direction.START, new State());
         states.put(Direction.END, new State());
+
+        directionPositions = new DirectionPosition[Direction.values().length];
+        for (int i = 0; i < directionPositions.length; i++) {
+            directionPositions[i] = new DirectionPosition(Direction.values()[i], NO_POSITION);
+        }
     }
 
     public void setLoadingCallback(LoadingCallback loadingCallback) {
@@ -180,7 +200,6 @@ public class EndlessHandler {
         for (Direction direction : Direction.values()) {
             if (isEnabled(direction) && getState(direction).hasView()) {
                 ourViews++;
-                break;
             }
         }
 
@@ -215,7 +234,7 @@ public class EndlessHandler {
     private State getState(int position) {
         for (Direction direction : Direction.values()) {
             State state = getState(direction);
-            if (state.position == position
+            if (directionPositions[direction.ordinal()].position == position
                     && state.hasView()
                     && isEnabled(direction)) {
                 return state;
@@ -233,7 +252,7 @@ public class EndlessHandler {
     }
 
     public View getView(int position, ViewGroup parent, int count) {
-        loadMoreItemsIfNeeded(position, count);
+        postLoadMoreIfNeeded(position, count);
 
         View view = getEndlessAdapterView(position, parent, count);
         if (view != null) {
@@ -244,10 +263,14 @@ public class EndlessHandler {
     }
 
     public int getOriginalPosition(int position) {
-        if (getState(0) != null) {
-            position--;
+        int resultPosition = position;
+        for (DirectionPosition directionPosition : directionPositions) {
+            if (directionPosition.position != NO_POSITION
+                    && position >= directionPosition.position) {
+                resultPosition--;
+            }
         }
-        return position;
+        return resultPosition;
     }
 
     private View getEndlessAdapterView(int position, ViewGroup parent, int count) {
@@ -287,15 +310,41 @@ public class EndlessHandler {
         return null;
     }
 
-    private void loadMoreItemsIfNeeded(int position, int count) {
+    private void postLoadMoreIfNeeded(int position, int count) {
         for (Direction direction : Direction.values()) {
             State state = getState(direction);
             if (isEnabled(direction)
                     && state.waitingToLoad()
                     && shouldStartLoading(direction, position, count)) {
-                state.viewType = ViewType.LOADING;
-                loadingCallback.onLoadMore(direction);
+                postLoadMore(direction);
             }
+        }
+    }
+
+    private void postLoadMore(Direction direction) {
+        switch (direction) {
+            case START:
+                postLoadMore(LOAD_START);
+                break;
+            case END:
+                postLoadMore(LOAD_END);
+                break;
+        }
+    }
+
+    private void postLoadMore(int direction) {
+        if (!handler.hasMessages(direction)) {
+            handler.sendEmptyMessage(direction);
+        }
+    }
+
+    private void loadMoreItems(Direction direction) {
+        State state = getState(direction);
+        if (isEnabled(direction)
+                && state.waitingToLoad()) {
+            state.viewType = ViewType.LOADING;
+            loadingCallback.onLoadMore(direction);
+            postNotifyDataSetChanged();
         }
     }
 
@@ -321,18 +370,40 @@ public class EndlessHandler {
         refreshStatePositions(superCount);
     }
 
+    private void postNotifyDataSetChanged() {
+        if (!handler.hasMessages(NOTIFY_CHANGE)) {
+            handler.sendEmptyMessage(NOTIFY_CHANGE);
+        }
+    }
+
     private void notifyDataSetChanged() {
         observer.onChanged();
     }
 
     private void refreshStatePositions(int superCount) {
         for (Direction direction : Direction.values()) {
-            State state = getState(direction);
-            state.position = getPosition(direction, superCount);
+            DirectionPosition record = directionPositions[direction.ordinal()];
+            record.direction = direction;
+            record.position = getInsertPosition(direction, superCount);
         }
+
+        Arrays.sort(directionPositions, DIRECTION_POSITION_BY_POSITION_COMPARATOR);
+        int offset = 0;
+        for (DirectionPosition position : directionPositions) {
+            if (position.position >= 0) {
+                position.position += offset;
+                offset++;
+            }
+        }
+        Arrays.sort(directionPositions, DIRECTION_POSITION_BY_DIRECTION_COMPARATOR);
     }
 
-    public int getPosition(Direction direction, int superCount) {
+    private int getInsertPosition(Direction direction, int superCount) {
+        if (!isEnabled(direction)
+                || !getState(direction).hasView()) {
+            return NO_POSITION;
+        }
+
         switch (direction) {
             case START:
                 return 0;
@@ -342,10 +413,14 @@ public class EndlessHandler {
         }
     }
 
+    public int getPosition(Direction direction) {
+        return directionPositions[direction.ordinal()].position;
+    }
+
     public Direction getDirection(int endlessPosition) {
         for (Direction direction : Direction.values()) {
             if (isEnabled(direction)
-                    && getState(direction).position == endlessPosition) {
+                    && directionPositions[direction.ordinal()].position == endlessPosition) {
                 return direction;
             }
         }
@@ -357,7 +432,6 @@ public class EndlessHandler {
         private View errorView = null;
         private boolean keepOnAppending = true;
         private ViewType viewType = ViewType.NONE;
-        private int position;
 
         public void reset() {
             pendingView = null;
@@ -384,4 +458,32 @@ public class EndlessHandler {
         View getErrorView(ViewGroup parent);
         View getPendingView(ViewGroup parent);
     }
+
+    static class DirectionPosition {
+        Direction direction;
+        int position;
+
+        public DirectionPosition(Direction direction, int position) {
+            this.direction = direction;
+            this.position = position;
+        }
+    }
+
+    static Comparator<DirectionPosition> DIRECTION_POSITION_BY_DIRECTION_COMPARATOR = new Comparator<DirectionPosition>() {
+        @Override
+        public int compare(DirectionPosition lhs, DirectionPosition rhs) {
+            int lhsVal = lhs.direction.ordinal();
+            int rhsVal = rhs.direction.ordinal();
+            return lhsVal < rhsVal ? -1 : (lhsVal == rhsVal ? 0 : 1);
+        }
+    };
+
+    static Comparator<DirectionPosition> DIRECTION_POSITION_BY_POSITION_COMPARATOR = new Comparator<DirectionPosition>() {
+        @Override
+        public int compare(DirectionPosition lhs, DirectionPosition rhs) {
+            int lhsVal = lhs.position;
+            int rhsVal = rhs.position;
+            return lhsVal < rhsVal ? -1 : (lhsVal == rhsVal ? 0 : 1);
+        }
+    };
 }

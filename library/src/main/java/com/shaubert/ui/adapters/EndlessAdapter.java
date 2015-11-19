@@ -49,6 +49,7 @@ public class EndlessAdapter extends AdapterWrapper implements EndlessHandler.Get
                 notifyDataSetChanged();
             }
         });
+        endlessHandler.onDataSetChanged(super.getCount());
     }
 
     public int getPendingResource() {

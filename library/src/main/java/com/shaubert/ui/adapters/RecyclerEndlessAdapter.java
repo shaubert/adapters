@@ -44,6 +44,7 @@ public class RecyclerEndlessAdapter extends RecyclerAdapterWrapper {
                 notifyDataSetChanged();
             }
         });
+        endlessHandler.onDataSetChanged(super.getItemCount());
     }
 
     public int getPendingResource() {
