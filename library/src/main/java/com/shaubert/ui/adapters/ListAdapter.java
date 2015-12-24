@@ -1,5 +1,8 @@
 package com.shaubert.ui.adapters;
 
+import android.content.Context;
+import android.content.res.Resources;
+import android.support.v7.widget.ThemedSpinnerAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,7 +10,10 @@ import android.widget.BaseAdapter;
 
 import java.util.*;
 
-public abstract class ListAdapter<T> extends BaseAdapter {
+public abstract class ListAdapter<T> extends BaseAdapter implements ThemedSpinnerAdapter {
+
+    private ThemedSpinnerAdapter.Helper dropDownHelper;
+    private Resources.Theme dropDownTheme;
 
     private boolean notifyOnChange = true;
     private List<T> allItems = new ArrayList<>();
@@ -199,8 +205,55 @@ public abstract class ListAdapter<T> extends BaseAdapter {
         return convertView;
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public View getDropDownView(int position, View convertView, ViewGroup parent) {
+        LayoutInflater inflater = getDropDownInflater(parent.getContext());
+        Object item = getItem(position);
+        if (convertView == null) {
+            convertView = createDropDownView((T) item, position, parent, inflater);
+        }
+        bindDropDownView(convertView, (T) item, position);
+        return convertView;
+    }
+
+    protected LayoutInflater getDropDownInflater(Context context) {
+        if (dropDownHelper == null) {
+            dropDownHelper = new Helper(context);
+            if (dropDownTheme != null) {
+                dropDownHelper.setDropDownViewTheme(dropDownTheme);
+            }
+        }
+        return dropDownHelper.getDropDownViewInflater();
+    }
+
+    protected View createDropDownView(T item, int pos, ViewGroup parent, LayoutInflater inflater) {
+        return createNormalView(item, pos, parent, inflater);
+    }
+
+    protected void bindDropDownView(View view, T item, int pos) {
+        bindNormalView(view, item, pos);
+    }
+
     protected abstract View createNormalView(T item, int pos, ViewGroup parent, LayoutInflater inflater);
 
     protected abstract void bindNormalView(View view, T item, int pos);
+
+    @Override
+    public void setDropDownViewTheme(Resources.Theme theme) {
+        dropDownTheme = theme;
+        if (dropDownHelper != null) {
+            dropDownHelper.setDropDownViewTheme(theme);
+        }
+    }
+
+    @Override
+    public Resources.Theme getDropDownViewTheme() {
+        if (dropDownHelper != null) {
+            return dropDownHelper.getDropDownViewTheme();
+        } else {
+            return dropDownTheme;
+        }
+    }
 
 }

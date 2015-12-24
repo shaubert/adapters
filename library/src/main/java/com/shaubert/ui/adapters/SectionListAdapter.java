@@ -141,13 +141,7 @@ public abstract class SectionListAdapter<T> extends ListAdapter<T> implements Se
         int itemType = getItemViewType(position);
         switch (itemType) {
         case ITEM_TYPE_HEADER:
-            Object item = getInternalItem(position);
-            if (convertView == null) {
-                LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-                convertView = createHeaderView(item, position, parent, inflater);
-            }
-            bindHeaderView(convertView, item, position);
-            return convertView;
+            return getHeaderView(position, convertView, parent, false);
 
         case ITEM_TYPE_NORMAL:
         default:
@@ -155,11 +149,52 @@ public abstract class SectionListAdapter<T> extends ListAdapter<T> implements Se
         }
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public View getDropDownView(int position, View convertView, ViewGroup parent) {
+        int itemType = getItemViewType(position);
+        switch (itemType) {
+            case ITEM_TYPE_HEADER:
+                return getHeaderView(position, convertView, parent, true);
+
+            case ITEM_TYPE_NORMAL:
+            default:
+                return super.getDropDownView(position, convertView, parent);
+        }
+    }
+
+    protected View getHeaderView(int position, View convertView, ViewGroup parent, boolean dropDown) {
+        Object item = getInternalItem(position);
+        if (convertView == null) {
+            if (dropDown) {
+                convertView = createHeaderDropDownView(item, position, parent,
+                        getDropDownInflater(parent.getContext()));
+            } else {
+                convertView = createHeaderView(item, position, parent,
+                        LayoutInflater.from(parent.getContext()));
+            }
+        }
+        if (dropDown) {
+            bindHeaderDropDownView(convertView, item, position);
+        } else {
+            bindHeaderView(convertView, item, position);
+        }
+        return convertView;
+    }
+
+    protected View createHeaderDropDownView(Object section, int pos, ViewGroup parent, LayoutInflater inflater) {
+        return createHeaderView(section, pos, parent, inflater);
+    }
+
     protected View createHeaderView(Object section, int pos, ViewGroup parent, LayoutInflater inflater) {
         if (sectionLayoutResId <= 0) {
             sectionLayoutResId = ThemeHelper.getSectionLayout(inflater.getContext());
         }
         return inflater.inflate(sectionLayoutResId, parent, false);
+    }
+
+    protected void bindHeaderDropDownView(View view, Object section, int pos) {
+        bindHeaderView(view, section, pos);
     }
 
     protected void bindHeaderView(View view, Object section, int pos) {
