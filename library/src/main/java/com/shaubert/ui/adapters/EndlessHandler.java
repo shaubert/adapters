@@ -216,12 +216,12 @@ public class EndlessHandler {
 
         switch (direction) {
             case START: {
-                int itemFromStartLoadingNewData = (int) (count * remainingPercentOfItemsToStartLoading);
+                int itemFromStartLoadingNewData = (int) ((count - 1) * remainingPercentOfItemsToStartLoading);
                 return position <= itemFromStartLoadingNewData;
             }
             case END:
             default: {
-                int itemFromStartLoadingNewData = (int) (count * (1 - remainingPercentOfItemsToStartLoading));
+                int itemFromStartLoadingNewData = (int) ((count - 1) * (1 - remainingPercentOfItemsToStartLoading));
                 return position >= itemFromStartLoadingNewData;
             }
         }
