@@ -7,7 +7,7 @@ Everyday use android adapters
         maven{url "https://github.com/shaubert/maven-repo/raw/master/releases"}
     }
     dependencies {
-        compile 'com.shaubert.ui.adapters:library:1.2.5'
+        compile 'com.shaubert.ui.adapters:library:1.2.6'
     }
 
 ## List of Adapters
