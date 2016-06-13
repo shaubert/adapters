@@ -114,7 +114,8 @@ public abstract class SectionListAdapter<T> extends ListAdapter<T> implements Se
     @Override
     public T getItem(int position) {
         if (sectionIndexer.isSectionStart(position)) {
-            throw new IllegalArgumentException("position \"" + position + "\" corresponds to section header!");
+            Exceptions.throwRuntime(
+                    new IllegalArgumentException("position \"" + position + "\" corresponds to section header!"));
         }
         return (T) getInternalItem(position);
     }

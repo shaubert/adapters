@@ -82,7 +82,7 @@ public class AdaptersCarousel extends BaseAdapter {
         if (index >= 0) {
             setCurrentAdapter(index);
         } else {
-            throw new IllegalArgumentException("Adapter must be added first!");
+            Exceptions.throwRuntime(new IllegalArgumentException("Adapter must be added first!"));
         }
     }
 
