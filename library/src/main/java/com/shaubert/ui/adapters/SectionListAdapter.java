@@ -116,6 +116,7 @@ public abstract class SectionListAdapter<T> extends ListAdapter<T> implements Se
         if (sectionIndexer.isSectionStart(position)) {
             Exceptions.throwRuntime(
                     new IllegalArgumentException("position \"" + position + "\" corresponds to section header!"));
+            return null;
         }
         return (T) getInternalItem(position);
     }

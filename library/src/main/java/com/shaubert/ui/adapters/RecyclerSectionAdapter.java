@@ -137,6 +137,15 @@ public abstract class RecyclerSectionAdapter<T, VH extends RecyclerView.ViewHold
         return (T) getInternalItem(position);
     }
 
+    @SuppressWarnings("unchecked")
+    public T getItemSafe(int position) {
+        if (sectionIndexer.isSectionStart(position)) {
+            return null;
+        } else {
+            return (T) getInternalItem(position);
+        }
+    }
+
     private Object getInternalItem(int position) {
         return sectionIndexer.isSectionStart(position)
                 ? getSections()[getSectionForPosition(position)]
