@@ -69,6 +69,7 @@ public abstract class StableIdsFragmentStatePagerAdapter extends PagerAdapter im
             }
         }
         fragment.setMenuVisibility(false);
+        fragment.setUserVisibleHint(false);
         if (id != NO_ID) {
             stableIds.put(position, id);
             mFragments.put(id, fragment);
@@ -166,9 +167,11 @@ public abstract class StableIdsFragmentStatePagerAdapter extends PagerAdapter im
         if (fragment != mCurrentPrimaryItem) {
             if (mCurrentPrimaryItem != null) {
                 mCurrentPrimaryItem.setMenuVisibility(false);
+                mCurrentPrimaryItem.setUserVisibleHint(false);
             }
             if (fragment != null) {
                 fragment.setMenuVisibility(true);
+                fragment.setUserVisibleHint(true);
             }
             mCurrentPrimaryItem = fragment;
         }
@@ -247,6 +250,7 @@ public abstract class StableIdsFragmentStatePagerAdapter extends PagerAdapter im
                     Fragment f = mFragmentManager.getFragment(bundle, key);
                     if (f != null) {
                         f.setMenuVisibility(false);
+                        f.setUserVisibleHint(false);
                         mFragments.put(id, f);
                     } else {
                         Log.w(TAG, "Bad fragment at key " + key);
