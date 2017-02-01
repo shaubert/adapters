@@ -28,13 +28,17 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * <p>
  * Adapter that merges multiple child adapters and views
  * into a single contiguous whole.
- * <p/>
+ * </p>
+ *
+ * <p>
  * Adapters used as pieces within MergeAdapter must have
  * view type IDs monotonically increasing from 0. Ideally,
  * adapters also have distinct ranges for their row ids, as
  * returned by getItemId().
+ * </p>
  */
 public class MergeAdapter extends BaseAdapter implements SectionIndexer {
     protected PieceStateRoster pieces = new PieceStateRoster();

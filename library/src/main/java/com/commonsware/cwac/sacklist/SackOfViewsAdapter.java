@@ -23,29 +23,41 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * <p>
  * Adapter that simply returns row views from a list.
- * <p/>
+ * </p>
+ *
+ * <p>
  * If you supply a size, you must implement newView(), to
  * create a required view. The adapter will then cache these
  * views.
- * <p/>
+ * </p>
+ *
+ * <p>
  * If you supply a list of views in the constructor, that
  * list will be used directly. If any elements in the list
  * are null, then newView() will be called just for those
  * slots.
- * <p/>
+ * </p>
+ *
+ * <p>
  * Subclasses may also wish to override areAllItemsEnabled()
  * (default: false) and isEnabled() (default: false), if some
  * of their rows should be selectable.
- * <p/>
+ * </p>
+ *
+ * <p>
  * It is assumed each view is unique, and therefore will not
  * get recycled.
- * <p/>
+ * </p>
+ *
+ * <p>
  * Note that this adapter is not designed for long lists. It
  * is more for screens that should behave like a list. This
  * is particularly useful if you combine this with other
  * adapters (e.g., SectionedAdapter) that might have an
  * arbitrary number of rows, so it all appears seamless.
+ * </p>
  */
 public class SackOfViewsAdapter extends BaseAdapter {
     private List<View> views = null;
