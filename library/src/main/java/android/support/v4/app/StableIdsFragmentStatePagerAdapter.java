@@ -217,21 +217,6 @@ public abstract class StableIdsFragmentStatePagerAdapter extends PagerAdapter im
                 mFragmentManager.putFragment(state, key, fragment);
             }
         }
-        int stIdsSize = stableIds.size();
-        if (stIdsSize != 0) {
-            if (state == null) {
-                state = new Bundle();
-            }
-            int[] keys = new int[stIdsSize];
-            long[] vals = new long[stIdsSize];
-            for (int i = 0; i < stIdsSize; i++) {
-                keys[i] = stableIds.keyAt(i);
-                vals[i] = stableIds.valueAt(i);
-            }
-            state.putInt("st-size", stIdsSize);
-            state.putIntArray("st-keys", keys);
-            state.putLongArray("st-vals", vals);
-        }
         return state;
     }
 
@@ -259,14 +244,6 @@ public abstract class StableIdsFragmentStatePagerAdapter extends PagerAdapter im
                     long id = Long.parseLong(key.substring(2));
                     Fragment.SavedState frState = bundle.getParcelable(key);
                     mSavedState.put(id, frState);
-                } else if (key.equals("st-size")) {
-                    long[] valsArr = bundle.getLongArray("st-vals");
-                    int[] keysArr = bundle.getIntArray("st-keys");
-                    stableIds.clear();
-                    int size = valsArr.length;
-                    for (int i = 0; i < size; i++) {
-                        stableIds.put(keysArr[i], valsArr[i]);
-                    }
                 }
             }
         }
