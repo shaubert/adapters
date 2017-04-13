@@ -232,7 +232,10 @@ public abstract class StableIdsFragmentStatePagerAdapter extends PagerAdapter im
             for (String key : keys) {
                 if (key.startsWith("fr")) {
                     long id = Long.parseLong(key.substring(2));
-                    Fragment f = mFragmentManager.getFragment(bundle, key);
+                    Fragment f = null;
+                    try {
+                        f = mFragmentManager.getFragment(bundle, key);
+                    } catch (Exception ignored) { }
                     if (f != null) {
                         f.setMenuVisibility(false);
                         f.setUserVisibleHint(false);
