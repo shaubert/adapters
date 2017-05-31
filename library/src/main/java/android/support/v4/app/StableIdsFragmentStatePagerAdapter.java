@@ -38,6 +38,16 @@ public abstract class StableIdsFragmentStatePagerAdapter extends PagerAdapter im
 
     public abstract long getStableId(int position);
 
+    private long getStableId(Fragment item) {
+        for (int i = 0; i < mFragments.size(); i++) {
+            if (mFragments.valueAt(i) == item) {
+                return mFragments.keyAt(i);
+            }
+        }
+
+        return NO_ID;
+    }
+
     @Override
     public void startUpdate(ViewGroup container) {
     }
@@ -94,7 +104,11 @@ public abstract class StableIdsFragmentStatePagerAdapter extends PagerAdapter im
         if (oldId == null || oldId != newId) {
             return null;
         } else {
-            return mFragments.get(newId);
+            Fragment fragment = mFragments.get(newId);
+            if (getStableId(fragment) != newId) {
+                return null;
+            }
+            return fragment;
         }
     }
 
@@ -144,10 +158,7 @@ public abstract class StableIdsFragmentStatePagerAdapter extends PagerAdapter im
         if (mCurTransaction == null) {
             mCurTransaction = mFragmentManager.beginTransaction();
         }
-        Long id = stableIds.get(position);
-        if (id == null) {
-            id = NO_ID;
-        }
+        long id = getStableId(fragment);
         if (DEBUG) Log.v(TAG, "Removing item " + position + "/" + id + ": f=" + object
                 + " v=" + ((Fragment) object).getView());
 
