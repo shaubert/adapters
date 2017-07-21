@@ -101,14 +101,10 @@ public abstract class StableIdsFragmentStatePagerAdapter extends PagerAdapter im
     private Fragment getFragmentByPos(int pos) {
         Long oldId = stableIds.get(pos);
         long newId = getStableId(pos);
-        if (oldId == null || oldId != newId) {
+        if (oldId != null && oldId != newId) {
             return null;
         } else {
-            Fragment fragment = mFragments.get(newId);
-            if (getStableId(fragment) != newId) {
-                return null;
-            }
-            return fragment;
+            return mFragments.get(newId);
         }
     }
 
