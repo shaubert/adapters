@@ -32,7 +32,7 @@ public class RecycleMergeAdapter extends RecyclerView.Adapter implements Section
 
     public <T extends RecyclerView.Adapter & RecyclerAdapterExtension> void addAdapter(T adapter) {
         pieces.add(adapter);
-        adapter.registerAdapterDataObserver(new CascadeDataSetObserver());
+        adapter.registerAdapterDataObserver(new CascadeDataSetObserver(adapter));
     }
 
     public void addViewHolder(RecyclerView.ViewHolder view) {
@@ -251,6 +251,14 @@ public class RecycleMergeAdapter extends RecyclerView.Adapter implements Section
         notifyDataSetChanged();
     }
 
+    private int innerAdapterPositionToGlobalPosition(int position, RecyclerView.Adapter adapter) {
+        for (RecyclerView.Adapter piece : getPieces()) {
+            if (piece == adapter) return position;
+            position += piece.getItemCount();
+        }
+        return position;
+    }
+
     protected List<RecyclerView.Adapter> getPieces() {
         return pieces.getPieces();
     }
@@ -315,6 +323,12 @@ public class RecycleMergeAdapter extends RecyclerView.Adapter implements Section
     }
 
     private class CascadeDataSetObserver extends RecyclerView.AdapterDataObserver {
+        final RecyclerView.Adapter adapter;
+
+        CascadeDataSetObserver(RecyclerView.Adapter adapter) {
+            this.adapter = adapter;
+        }
+
         @Override
         public void onChanged() {
             notifyDataSetChanged();
@@ -322,23 +336,25 @@ public class RecycleMergeAdapter extends RecyclerView.Adapter implements Section
 
         @Override
         public void onItemRangeChanged(int positionStart, int itemCount) {
-            notifyItemRangeChanged(positionStart, itemCount);
+            notifyItemRangeChanged(innerAdapterPositionToGlobalPosition(positionStart, adapter), itemCount);
         }
 
         @Override
         public void onItemRangeInserted(int positionStart, int itemCount) {
-            notifyItemRangeInserted(positionStart, itemCount);
+            notifyItemRangeInserted(innerAdapterPositionToGlobalPosition(positionStart, adapter), itemCount);
         }
 
         @Override
         public void onItemRangeRemoved(int positionStart, int itemCount) {
-            notifyItemRangeRemoved(positionStart, itemCount);
+            notifyItemRangeRemoved(innerAdapterPositionToGlobalPosition(positionStart, adapter), itemCount);
         }
 
         @Override
         public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+            int adjFrom = innerAdapterPositionToGlobalPosition(fromPosition, adapter);
+            int adjTo = innerAdapterPositionToGlobalPosition(toPosition, adapter);
             for (int i = 0; i < itemCount; i++) {
-                notifyItemMoved(fromPosition + i, toPosition + i);
+                notifyItemMoved(adjFrom + i, adjTo + i);
             }
         }
     }
