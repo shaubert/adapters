@@ -156,10 +156,17 @@ public abstract class RecyclerAdapter<T, VH extends RecyclerView.ViewHolder> ext
     }
 
     public void removeItem(T item) {
-        allItems.remove(item);
-        filter();
-        onDataSetChanged();
-        notifyDataSetIfNeeded();
+        int index = allItems.indexOf(item);
+        if (index >= 0) {
+            allItems.remove(item);
+            filter();
+            onDataSetChanged();
+            if (!globalDataSetChange && notifyOnChange) {
+                notifyItemRemoved(index);
+            } else {
+                notifyDataSetIfNeeded();
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")
