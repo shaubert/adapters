@@ -108,11 +108,10 @@ public class RecycleMergeAdapter extends RecyclerView.Adapter implements Section
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        for (RecyclerView.Adapter piece : getPieces()) {
-            int viewTypeCount = getViewTypeCount(piece);
-
+        for (PieceState piece : pieces.getRawPieces()) {
+            int viewTypeCount = getViewTypeCount(piece.adapter);
             if (viewType < viewTypeCount) {
-                return (piece.onCreateViewHolder(parent, viewType));
+                return (piece.adapter.onCreateViewHolder(parent, viewType));
             }
             viewType -= viewTypeCount;
         }
