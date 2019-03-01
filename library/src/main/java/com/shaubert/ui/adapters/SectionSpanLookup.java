@@ -1,6 +1,6 @@
 package com.shaubert.ui.adapters;
 
-import android.support.v7.widget.GridLayoutManager;
+import androidx.recyclerview.widget.GridLayoutManager;
 
 public class SectionSpanLookup extends GridLayoutManager.SpanSizeLookup {
 

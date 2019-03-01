@@ -1,6 +1,6 @@
 package com.shaubert.ui.adapters;
 
-import android.support.v4.util.LongSparseArray;
+import androidx.collection.LongSparseArray;
 import android.view.View;
 import android.widget.Checkable;
 

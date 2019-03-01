@@ -1,15 +1,20 @@
-package android.support.v4.app;
+package com.shaubert.ui.adapters;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.v4.util.LongSparseArray;
-import android.support.v4.util.SparseArrayCompat;
-import android.support.v4.view.PagerAdapter;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.shaubert.ui.adapters.common.FragmentIndexResolver;
+
+import androidx.collection.LongSparseArray;
+import androidx.collection.SparseArrayCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.viewpager.widget.PagerAdapter;
 
 public abstract class StableIdsFragmentStatePagerAdapter extends PagerAdapter implements FragmentIndexResolver {
 
@@ -74,7 +79,6 @@ public abstract class StableIdsFragmentStatePagerAdapter extends PagerAdapter im
         if (mSavedState.size() != 0 && id != NO_ID) {
             Fragment.SavedState fss = mSavedState.get(id);
             if (fss != null) {
-                fss.mState.setClassLoader(fragment.getClass().getClassLoader());
                 fragment.setInitialSavedState(fss);
             }
         }
@@ -89,11 +93,6 @@ public abstract class StableIdsFragmentStatePagerAdapter extends PagerAdapter im
             mCurTransaction.remove(curFr);
         }
         mCurTransaction.add(container.getId(), fragment, "fr" + id);
-
-        Bundle savedFragmentState = fragment.mSavedFragmentState;
-        if (savedFragmentState != null) {
-            savedFragmentState.setClassLoader(fragment.getClass().getClassLoader());
-        }
 
         return fragment;
     }

@@ -1,6 +1,6 @@
 package com.shaubert.ui.adapters;
 
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.ViewGroup;
 
 public class RecyclerAdapterWrapper extends RecyclerView.Adapter implements RecyclerAdapterExtension {
