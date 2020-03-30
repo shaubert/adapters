@@ -17,7 +17,17 @@ public class RecycleMergeAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         super();
     }
 
-    public <T extends RecyclerView.Adapter<RecyclerView.ViewHolder> & RecyclerAdapterExtension> void addAdapter(T adapter) {
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public <T extends RecyclerView.Adapter & RecyclerAdapterExtension> void addAdapter(T adapter) {
+        pieces.add(adapter);
+        adapter.registerAdapterDataObserver(new CascadeDataSetObserver(adapter));
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public <T extends RecyclerView.Adapter> void addAdapterUnsafe(T adapter) {
+        if (!(adapter instanceof RecyclerAdapterExtension)) {
+            throw new IllegalArgumentException("adapter should be an instance of RecyclerAdapterExtension");
+        }
         pieces.add(adapter);
         adapter.registerAdapterDataObserver(new CascadeDataSetObserver(adapter));
     }
