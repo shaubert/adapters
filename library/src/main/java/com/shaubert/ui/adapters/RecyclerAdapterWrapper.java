@@ -1,12 +1,14 @@
 package com.shaubert.ui.adapters;
 
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.ViewGroup;
 
-public class RecyclerAdapterWrapper extends RecyclerView.Adapter implements RecyclerAdapterExtension {
-    private RecyclerView.Adapter wrapped = null;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
-    public RecyclerAdapterWrapper(RecyclerView.Adapter wrapped) {
+public class RecyclerAdapterWrapper extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements RecyclerAdapterExtension {
+    private RecyclerView.Adapter<RecyclerView.ViewHolder> wrapped;
+
+    public RecyclerAdapterWrapper(RecyclerView.Adapter<RecyclerView.ViewHolder> wrapped) {
         this.wrapped = wrapped;
         super.setHasStableIds(wrapped.hasStableIds());
 
@@ -48,14 +50,14 @@ public class RecyclerAdapterWrapper extends RecyclerView.Adapter implements Recy
     protected void onInnerAdapterChanged() {
     }
 
+    @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return wrapped.onCreateViewHolder(parent, viewType);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         wrapped.onBindViewHolder(holder, position);
     }
 
@@ -79,35 +81,32 @@ public class RecyclerAdapterWrapper extends RecyclerView.Adapter implements Recy
         return wrapped.getItemCount();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public void onViewRecycled(RecyclerView.ViewHolder holder) {
+    public void onViewRecycled(@NonNull RecyclerView.ViewHolder holder) {
         wrapped.onViewRecycled(holder);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public void onViewAttachedToWindow(RecyclerView.ViewHolder holder) {
+    public void onViewAttachedToWindow(@NonNull RecyclerView.ViewHolder holder) {
         wrapped.onViewAttachedToWindow(holder);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public void onViewDetachedFromWindow(RecyclerView.ViewHolder holder) {
+    public void onViewDetachedFromWindow(@NonNull RecyclerView.ViewHolder holder) {
         wrapped.onViewDetachedFromWindow(holder);
     }
 
     @Override
-    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
         wrapped.onAttachedToRecyclerView(recyclerView);
     }
 
     @Override
-    public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
+    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
         wrapped.onDetachedFromRecyclerView(recyclerView);
     }
 
-    public RecyclerView.Adapter getWrappedAdapter() {
+    public RecyclerView.Adapter<RecyclerView.ViewHolder> getWrappedAdapter() {
         return wrapped;
     }
 

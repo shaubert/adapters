@@ -1,5 +1,6 @@
 package com.shaubert.ui.adapters;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class RecyclerCheckableAdapter extends RecyclerAdapterWrapper {
@@ -9,13 +10,13 @@ public class RecyclerCheckableAdapter extends RecyclerAdapterWrapper {
     /**
      * Constructor wrapping a supplied ListAdapter
      *
-     * @param wrapped
+     * @param wrapped - wrapped adapter
      */
-    public RecyclerCheckableAdapter(RecyclerView.Adapter wrapped) {
+    public RecyclerCheckableAdapter(RecyclerView.Adapter<RecyclerView.ViewHolder> wrapped) {
         this(wrapped, 0);
     }
 
-    public RecyclerCheckableAdapter(RecyclerView.Adapter wrapped, int checkableViewId) {
+    public RecyclerCheckableAdapter(RecyclerView.Adapter<RecyclerView.ViewHolder> wrapped, int checkableViewId) {
         super(wrapped);
         state = new CheckableAdapterState(checkableViewId) {
             @Override
@@ -66,7 +67,7 @@ public class RecyclerCheckableAdapter extends RecyclerAdapterWrapper {
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         super.onBindViewHolder(holder, position);
         state.refreshViewCheckedState(holder.itemView, getItemId(position));
     }

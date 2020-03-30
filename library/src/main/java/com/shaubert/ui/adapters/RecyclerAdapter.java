@@ -114,9 +114,7 @@ public abstract class RecyclerAdapter<T, VH extends RecyclerView.ViewHolder> ext
     }
 
     public void addItems(Collection<T> items, boolean shouldResort) {
-        for (T item : items) {
-            allItems.add(item);
-        }
+        allItems.addAll(items);
         if (shouldResort) {
             sort(allItems);
         }
@@ -124,7 +122,7 @@ public abstract class RecyclerAdapter<T, VH extends RecyclerView.ViewHolder> ext
 
         onDataSetChanged();
         if (!globalDataSetChange && notifyOnChange) {
-            int newPositions[] = new int[items.size()];
+            int[] newPositions = new int[items.size()];
             int pos = 0;
             for (T item : items) {
                 newPositions[pos++] = getIndexOf(item);
@@ -169,7 +167,7 @@ public abstract class RecyclerAdapter<T, VH extends RecyclerView.ViewHolder> ext
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"rawtypes"})
     protected void sort(List items) {
         if (itemsComparator != null) {
             Collections.sort(items, itemsComparator);

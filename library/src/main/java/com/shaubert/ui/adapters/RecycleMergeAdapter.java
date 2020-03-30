@@ -1,51 +1,38 @@
-/***
- Copyright (c) 2008-2009 CommonsWare, LLC
- Portions (c) 2009 Google, Inc.
-
- Licensed under the Apache License, Version 2.0 (the "License"); you may
- not use this file except in compliance with the License. You may obtain
- a copy of the License at
- http://www.apache.org/licenses/LICENSE-2.0
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
- */
-
 package com.shaubert.ui.adapters;
 
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.ViewGroup;
 import android.widget.SectionIndexer;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class RecycleMergeAdapter extends RecyclerView.Adapter implements SectionIndexer, RecyclerAdapterExtension {
+public class RecycleMergeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements SectionIndexer, RecyclerAdapterExtension {
     protected PieceStateRoster pieces = new PieceStateRoster();
 
     public RecycleMergeAdapter() {
         super();
     }
 
-    public <T extends RecyclerView.Adapter & RecyclerAdapterExtension> void addAdapter(T adapter) {
+    public <T extends RecyclerView.Adapter<RecyclerView.ViewHolder> & RecyclerAdapterExtension> void addAdapter(T adapter) {
         pieces.add(adapter);
         adapter.registerAdapterDataObserver(new CascadeDataSetObserver(adapter));
     }
 
-    public void addViewHolder(RecyclerView.ViewHolder view) {
+    public void addViewHolder(ViewHolderProvider view) {
         addViews(Collections.singletonList(view));
     }
 
-    public void addViews(List<RecyclerView.ViewHolder> views) {
+    public void addViews(List<ViewHolderProvider> views) {
         addAdapter(new RecyclerSackOfViewsAdapter(views));
     }
 
     @Override
     public Object getItem(int position) {
-        for (RecyclerView.Adapter piece : getPieces()) {
+        for (RecyclerView.Adapter<RecyclerView.ViewHolder> piece : getPieces()) {
             int size = piece.getItemCount();
 
             if (position < size) {
@@ -58,8 +45,8 @@ public class RecycleMergeAdapter extends RecyclerView.Adapter implements Section
         return (null);
     }
 
-    public RecyclerView.Adapter getAdapter(int position) {
-        for (RecyclerView.Adapter piece : getPieces()) {
+    public RecyclerView.Adapter<RecyclerView.ViewHolder> getAdapter(int position) {
+        for (RecyclerView.Adapter<RecyclerView.ViewHolder> piece : getPieces()) {
             int size = piece.getItemCount();
 
             if (position < size) {
@@ -106,8 +93,11 @@ public class RecycleMergeAdapter extends RecyclerView.Adapter implements Section
         return (result);
     }
 
+    @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        int originalType = viewType;
+
         for (PieceState piece : pieces.getRawPieces()) {
             int viewTypeCount = getViewTypeCount(piece.adapter);
             if (viewType < viewTypeCount) {
@@ -116,17 +106,16 @@ public class RecycleMergeAdapter extends RecyclerView.Adapter implements Section
             viewType -= viewTypeCount;
         }
 
-        return null;
+        throw new IllegalArgumentException("there is no adapter to create view with viewType: " + originalType);
     }
 
-    private int getViewTypeCount(RecyclerView.Adapter piece) {
+    private int getViewTypeCount(RecyclerView.Adapter<RecyclerView.ViewHolder> piece) {
         return ((RecyclerAdapterExtension) piece).getViewTypeCount();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        for (RecyclerView.Adapter piece : getPieces()) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        for (RecyclerView.Adapter<RecyclerView.ViewHolder> piece : getPieces()) {
             int size = piece.getItemCount();
 
             if (position < size) {
@@ -140,7 +129,7 @@ public class RecycleMergeAdapter extends RecyclerView.Adapter implements Section
 
     @Override
     public long getItemId(int position) {
-        for (RecyclerView.Adapter piece : getPieces()) {
+        for (RecyclerView.Adapter<RecyclerView.ViewHolder> piece : getPieces()) {
             int size = piece.getItemCount();
 
             if (position < size) {
@@ -157,7 +146,7 @@ public class RecycleMergeAdapter extends RecyclerView.Adapter implements Section
     public int getItemCount() {
         int total = 0;
 
-        for (RecyclerView.Adapter piece : getPieces()) {
+        for (RecyclerView.Adapter<RecyclerView.ViewHolder> piece : getPieces()) {
             total += piece.getItemCount();
         }
 
@@ -168,7 +157,7 @@ public class RecycleMergeAdapter extends RecyclerView.Adapter implements Section
     public int getPositionForSection(int section) {
         int position = 0;
 
-        for (RecyclerView.Adapter piece : getPieces()) {
+        for (RecyclerView.Adapter<RecyclerView.ViewHolder> piece : getPieces()) {
             if (piece instanceof SectionIndexer) {
                 Object[] sections = ((SectionIndexer) piece).getSections();
                 int numSections = 0;
@@ -194,7 +183,7 @@ public class RecycleMergeAdapter extends RecyclerView.Adapter implements Section
     public int getSectionForPosition(int position) {
         int section = 0;
 
-        for (RecyclerView.Adapter piece : getPieces()) {
+        for (RecyclerView.Adapter<RecyclerView.ViewHolder> piece : getPieces()) {
             int size = piece.getItemCount();
 
             if (position < size) {
@@ -221,9 +210,9 @@ public class RecycleMergeAdapter extends RecyclerView.Adapter implements Section
 
     @Override
     public Object[] getSections() {
-        ArrayList<Object> sections = new ArrayList<Object>();
+        ArrayList<Object> sections = new ArrayList<>();
 
-        for (RecyclerView.Adapter piece : getPieces()) {
+        for (RecyclerView.Adapter<RecyclerView.ViewHolder> piece : getPieces()) {
             if (piece instanceof SectionIndexer) {
                 Object[] curSections = ((SectionIndexer) piece).getSections();
 
@@ -237,36 +226,36 @@ public class RecycleMergeAdapter extends RecyclerView.Adapter implements Section
             return (new String[0]);
         }
 
-        return (sections.toArray(new Object[sections.size()]));
+        return (sections.toArray(new Object[0]));
     }
 
-    public void setActive(RecyclerView.Adapter adapter, boolean isActive) {
+    public void setActive(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, boolean isActive) {
         pieces.setActive(adapter, isActive);
         notifyDataSetChanged();
     }
 
-    public void setActive(RecyclerView.ViewHolder v, boolean isActive) {
+    public void setActive(ViewHolderProvider v, boolean isActive) {
         pieces.setActive(v, isActive);
         notifyDataSetChanged();
     }
 
-    private int innerAdapterPositionToGlobalPosition(int position, RecyclerView.Adapter adapter) {
-        for (RecyclerView.Adapter piece : getPieces()) {
+    private int innerAdapterPositionToGlobalPosition(int position, RecyclerView.Adapter<RecyclerView.ViewHolder> adapter) {
+        for (RecyclerView.Adapter<RecyclerView.ViewHolder> piece : getPieces()) {
             if (piece == adapter) return position;
             position += piece.getItemCount();
         }
         return position;
     }
 
-    protected List<RecyclerView.Adapter> getPieces() {
+    protected List<RecyclerView.Adapter<RecyclerView.ViewHolder>> getPieces() {
         return pieces.getPieces();
     }
 
     private static class PieceState {
-        RecyclerView.Adapter adapter;
-        boolean isActive = true;
+        RecyclerView.Adapter<RecyclerView.ViewHolder> adapter;
+        boolean isActive;
 
-        PieceState(RecyclerView.Adapter adapter, boolean isActive) {
+        PieceState(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, boolean isActive) {
             this.adapter = adapter;
             this.isActive = isActive;
         }
@@ -274,14 +263,14 @@ public class RecycleMergeAdapter extends RecyclerView.Adapter implements Section
 
     private static class PieceStateRoster {
         protected ArrayList<PieceState> pieces = new ArrayList<>();
-        protected ArrayList<RecyclerView.Adapter> active = null;
+        protected ArrayList<RecyclerView.Adapter<RecyclerView.ViewHolder>> active = null;
 
-        void add(RecyclerView.Adapter adapter) {
+        void add(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter) {
             pieces.add(new PieceState(adapter, true));
             active = null;
         }
 
-        void setActive(RecyclerView.Adapter adapter, boolean isActive) {
+        void setActive(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, boolean isActive) {
             for (PieceState state : pieces) {
                 if (state.adapter == adapter) {
                     state.isActive = isActive;
@@ -291,7 +280,7 @@ public class RecycleMergeAdapter extends RecyclerView.Adapter implements Section
             }
         }
 
-        void setActive(RecyclerView.ViewHolder v, boolean isActive) {
+        void setActive(ViewHolderProvider v, boolean isActive) {
             for (PieceState state : pieces) {
                 if (state.adapter instanceof RecyclerSackOfViewsAdapter &&
                         ((RecyclerSackOfViewsAdapter) state.adapter).hasViewHolder(v)) {
@@ -306,7 +295,7 @@ public class RecycleMergeAdapter extends RecyclerView.Adapter implements Section
             return (pieces);
         }
 
-        List<RecyclerView.Adapter> getPieces() {
+        List<RecyclerView.Adapter<RecyclerView.ViewHolder>> getPieces() {
             if (active == null) {
                 active = new ArrayList<>();
 
@@ -322,9 +311,9 @@ public class RecycleMergeAdapter extends RecyclerView.Adapter implements Section
     }
 
     private class CascadeDataSetObserver extends RecyclerView.AdapterDataObserver {
-        final RecyclerView.Adapter adapter;
+        final RecyclerView.Adapter<RecyclerView.ViewHolder> adapter;
 
-        CascadeDataSetObserver(RecyclerView.Adapter adapter) {
+        CascadeDataSetObserver(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter) {
             this.adapter = adapter;
         }
 

@@ -1,9 +1,12 @@
 package com.shaubert.ui.adapters;
 
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.shaubert.ui.adapters.common.AdapterItemIds;
 
 public class RecyclerAdapterWithEmptyItem extends RecyclerAdapterWrapper {
@@ -12,11 +15,11 @@ public class RecyclerAdapterWithEmptyItem extends RecyclerAdapterWrapper {
     private boolean showEmptyItem = true;
     private int emptyItemLayoutResId;
 
-    public RecyclerAdapterWithEmptyItem(RecyclerView.Adapter wrapped) {
+    public RecyclerAdapterWithEmptyItem(RecyclerView.Adapter<RecyclerView.ViewHolder> wrapped) {
         this(wrapped, -1);
     }
 
-    public RecyclerAdapterWithEmptyItem(RecyclerView.Adapter wrapped, int emptyItemLayoutResId) {
+    public RecyclerAdapterWithEmptyItem(RecyclerView.Adapter<RecyclerView.ViewHolder> wrapped, int emptyItemLayoutResId) {
         super(wrapped);
         this.emptyItemLayoutResId = emptyItemLayoutResId;
     }
@@ -49,8 +52,9 @@ public class RecyclerAdapterWithEmptyItem extends RecyclerAdapterWrapper {
         return isShowingEmptyItem() ? 1 : super.getItemCount();
     }
 
+    @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (isShowingEmptyItem()) {
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
             return new RecyclerView.ViewHolder(createEmptyView(inflater, parent)) {
@@ -61,7 +65,7 @@ public class RecyclerAdapterWithEmptyItem extends RecyclerAdapterWrapper {
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (!isShowingEmptyItem()) {
             super.onBindViewHolder(holder, position);
         }

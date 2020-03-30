@@ -1,11 +1,14 @@
 package com.shaubert.ui.adapters;
 
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SectionIndexer;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.shaubert.ui.adapters.common.AdapterItemIds;
 
 public abstract class RecyclerSectionAdapter<T, VH extends RecyclerView.ViewHolder> extends RecyclerAdapter<T, RecyclerView.ViewHolder> implements SectionIndexer {
@@ -16,7 +19,7 @@ public abstract class RecyclerSectionAdapter<T, VH extends RecyclerView.ViewHold
         public SectionViewHolder(View itemView) {
             super(itemView);
 
-            sectionTitle = (TextView) itemView.findViewById(R.id.section_title);
+            sectionTitle = itemView.findViewById(R.id.section_title);
         }
 
         public void setSection(Object section) {
@@ -112,6 +115,7 @@ public abstract class RecyclerSectionAdapter<T, VH extends RecyclerView.ViewHold
         if (sectionIndexer.isSectionStart(position)) {
             return AdapterItemIds.getIdFrom(item);
         } else {
+            //noinspection unchecked
             return getItemId((T) item);
         }
     }
@@ -156,8 +160,9 @@ public abstract class RecyclerSectionAdapter<T, VH extends RecyclerView.ViewHold
         return getItemViewType(position) == ITEM_TYPE_HEADER;
     }
 
+    @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType) {
         if (viewType == ITEM_TYPE_HEADER) {
             return onCreateHeaderViewHolder(LayoutInflater.from(viewGroup.getContext()), viewGroup);
         } else {
@@ -167,7 +172,7 @@ public abstract class RecyclerSectionAdapter<T, VH extends RecyclerView.ViewHold
 
     @Override
     @SuppressWarnings("unchecked")
-    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
         Object item = getInternalItem(position);
         if (isSectionHeader(position)) {
             onBindHeaderViewHolder((SectionViewHolder) viewHolder, item, position);

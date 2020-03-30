@@ -1,11 +1,14 @@
 package com.shaubert.ui.adapters;
 
 import android.database.DataSetObserver;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.shaubert.ui.adapters.common.AdapterItemIds;
 
 public class RecyclerEndlessAdapter extends RecyclerAdapterWrapper {
@@ -15,11 +18,11 @@ public class RecyclerEndlessAdapter extends RecyclerAdapterWrapper {
 
     private EndlessHandler endlessHandler;
 
-    public RecyclerEndlessAdapter(RecyclerView.Adapter wrapped) {
+    public RecyclerEndlessAdapter(RecyclerView.Adapter<RecyclerView.ViewHolder> wrapped) {
         this(wrapped, -1, -1);
     }
 
-    public RecyclerEndlessAdapter(RecyclerView.Adapter wrapped, int pendingResource, int errorResource) {
+    public RecyclerEndlessAdapter(RecyclerView.Adapter<RecyclerView.ViewHolder> wrapped, int pendingResource, int errorResource) {
         super(wrapped);
         this.pendingResource = pendingResource;
         this.errorResource = errorResource;
@@ -173,8 +176,9 @@ public class RecyclerEndlessAdapter extends RecyclerAdapterWrapper {
         return endlessHandler.isEndlessItem(position);
     }
 
+    @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         int viewTypeCount = super.getViewTypeCount();
         if (viewType == viewTypeCount) {
             return new ViewHolder(getPendingView(parent));
@@ -186,7 +190,7 @@ public class RecyclerEndlessAdapter extends RecyclerAdapterWrapper {
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         endlessHandler.getView(position, null, super.getItemCount());
         if (!isEndlessAdapterItem(position)) {
             super.onBindViewHolder(holder, endlessHandler.getOriginalPosition(position));
